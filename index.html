@@ -127,7 +127,7 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    /* DataTables: Encabezado único, sin doble fila fantasma */
+    /* DataTables: Encabezado único alineado */
     .dataTables_wrapper {
       padding: 0;
       font-size: 0.75rem;
@@ -709,7 +709,7 @@
 
         <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">
           <button type="button" id="btn-cancel-modal-r" class="px-4 py-2 btn-outline text-xs font-semibold uppercase tracking-wider">Cancelar</button>
-          <button type="submit" class="px-5 py-2 btn-dark text-xs font-semibold uppercase tracking-wider">
+          <button type="submit" id="btn-save-r" class="px-5 py-2 btn-dark text-xs font-semibold uppercase tracking-wider">
             <span id="save-r-text">Guardar</span>
             <span id="save-r-loading" class="hidden">Guardando...</span>
           </button>
@@ -821,8 +821,8 @@
     // CONFIGURACIÓN DE CONEXIÓN A LA API
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG/exec";
-    const CACHE_KEY = "ci_sistema_cache_v4";
-    const USER_KEY = "ci_usuario_sesion_v4";
+    const CACHE_KEY = "ci_sistema_cache_v5";
+    const USER_KEY = "ci_usuario_sesion_v5";
 
     const state = {
       currentUser: null,
@@ -843,7 +843,7 @@
     let dtReclasificacion = null;
     let swalConfirmCallback = null;
 
-    // Configuración DataTables sin scrollX interno para evitar doble encabezado roto
+    // Configuración DataTables con scroll limpio sin duplicar encabezados
     const dtConfigBase = {
       deferRender: true,
       pageLength: 25,
@@ -861,7 +861,6 @@
       }
     };
 
-    // Alertas elegantes en verde esmeralda (éxito) o rojo sobrio (error)
     function showToast(message, isError = false) {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -881,7 +880,12 @@
       document.getElementById('swal-overlay').classList.remove('hidden');
     }
 
-    // Limpia en el cliente cualquier fecha larga residual ("Sat Jan 01 2022...") a "2022-01-01"
+    // Limpia cualquier cadena de texto con posibles corchetes de ID internos "[ID-001] Texto"
+    function ocultarIdsEnTexto(texto) {
+      if (!texto) return '—';
+      return String(texto).replace(/\[[^\]]*\]\s*/g, '').trim() || '—';
+    }
+
     function limpiarFechaUI(val) {
       if (!val) return '';
       const s = String(val).trim();
@@ -908,7 +912,6 @@
       return dt.toISOString().slice(0, 10);
     }
 
-    // Repara automáticamente en el navegador si el backend viejo devolvió el histórico corrido 1 columna
     function normalizarItemHistorico(r) {
       const codLooksLikeName = isNaN(Number(r.cod)) && r.cod && r.cod.length > 5 && !isNaN(Number(r.intermediario));
       if (codLooksLikeName) {
@@ -961,4 +964,928 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action, payload })
       });
-      if (!
+      if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+      return await response.json();
+    }
+
+    function aplicarDatosAlEstado(res) {
+      state.maestro = (Array.isArray(res.maestro) ? res.maestro : []).map(r => ({
+        ...r,
+        fechaInicio: limpiarFechaUI(r.fechaInicio),
+        fechaFin: limpiarFechaUI(r.fechaFin),
+        fechaNac: limpiarFechaUI(r.fechaNac),
+        fechaAfiliacion: limpiarFechaUI(r.fechaAfiliacion)
+      }));
+      state.historicoMaestro = (Array.isArray(res.historicoMaestro) ? res.historicoMaestro : []).map(normalizarItemHistorico);
+      state.historial = (Array.isArray(res.historial) ? res.historial : []).map(r => ({
+        ...r,
+        fechaInicio: limpiarFechaUI(r.fechaInicio),
+        fechaFin: limpiarFechaUI(r.fechaFin)
+      }));
+      state.bitacora = Array.isArray(res.bitacora) ? res.bitacora : [];
+      state.sucursales = Array.isArray(res.sucursales) ? res.sucursales : [];
+      state.ejecutivos = Array.isArray(res.ejecutivos) ? res.ejecutivos : [];
+      state.lideres = Array.isArray(res.lideres) ? res.lideres : [];
+      state.canales = Array.isArray(res.canales) ? res.canales : [];
+
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          maestro: state.maestro,
+          historicoMaestro: state.historicoMaestro,
+          historial: state.historial,
+          bitacora: state.bitacora,
+          sucursales: state.sucursales,
+          ejecutivos: state.ejecutivos,
+          lideres: state.lideres,
+          canales: state.canales
+        }));
+      } catch (e) {}
+
+      poblarSelectores();
+      renderizarTodo();
+    }
+
+    function poblarSelectores() {
+      const llenar = (id, items, placeholder, keepAll = false) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const prev = el.value;
+        el.innerHTML = '';
+        const opt0 = document.createElement('option');
+        opt0.value = keepAll ? 'ALL' : '';
+        opt0.textContent = placeholder;
+        el.appendChild(opt0);
+        items.forEach(val => {
+          const o = document.createElement('option');
+          o.value = val;
+          o.textContent = val;
+          el.appendChild(o);
+        });
+        if (prev && (items.includes(prev) || prev === 'ALL')) el.value = prev;
+      };
+
+      llenar('filter-m-sucursal', state.sucursales, 'Sucursal: Todas', true);
+      llenar('filter-m-ejecutivo', state.ejecutivos, 'Ejecutivo: Todos', true);
+      llenar('filter-m-lider', state.lideres, 'Líder: Todos', true);
+
+      llenar('filter-r-sucursal', state.sucursales, 'Sucursal: Todas', true);
+      llenar('filter-r-ejecutivo', state.ejecutivos, 'Ejecutivo: Todos', true);
+      llenar('filter-r-lider', state.lideres, 'Líder: Todos', true);
+      llenar('filter-r-canal', state.canales, 'Canal: Todos', true);
+
+      llenar('form-m-ejecutivo', state.ejecutivos, 'Seleccionar ejecutivo...');
+      llenar('form-m-sucursal', state.sucursales, 'Seleccionar sucursal...');
+      llenar('form-m-lider', state.lideres, 'Sin líder / Seleccionar...');
+
+      llenar('form-r-sucursal', state.sucursales, 'Seleccionar sucursal...');
+      llenar('form-r-ejecutivo', state.ejecutivos, 'Seleccionar ejecutivo...');
+      llenar('form-r-lider', state.lideres, 'Seleccionar líder...');
+      llenar('form-r-canal', state.canales, 'Seleccionar canal...');
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE LAS 3 TABLAS (CERO IDs VISIBLES)
+    // =========================================================================
+    function renderizarTodo() {
+      document.getElementById('badge-maestro').textContent = state.maestro.length;
+      document.getElementById('badge-historico-maestro').textContent = state.historicoMaestro.length;
+      document.getElementById('badge-reclasificacion').textContent = state.historial.length;
+
+      renderTablaMaestro();
+      renderTablaHistoricoMaestro();
+      renderTablaReclasificacion();
+    }
+
+    // Vista 1: Control de intermediarios (12 columnas de negocio + Acciones, sin ID)
+    function renderTablaMaestro() {
+      const fSuc = document.getElementById('filter-m-sucursal').value;
+      const fEje = document.getElementById('filter-m-ejecutivo').value;
+      const fLid = document.getElementById('filter-m-lider').value;
+      const fAct = document.getElementById('filter-m-activo').value;
+
+      const filtrados = state.maestro.filter(r => {
+        if (fSuc !== 'ALL' && r.sucursal !== fSuc) return false;
+        if (fEje !== 'ALL' && r.ejecutivo !== fEje) return false;
+        if (fLid !== 'ALL' && r.lider !== fLid) return false;
+        if (fAct !== 'ALL' && r.activo !== fAct) return false;
+        return true;
+      });
+
+      const dataRows = filtrados.map(r => {
+        const liberado = r.fechaFin && r.fechaFin !== '';
+        const isActivo = r.activo === 'SI';
+        const badgeActivo = `<button type="button" class="btn-toggle-m-activo px-2.5 py-0.5 text-[11px] font-mono font-semibold border ${
+          isActivo
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-700 hover:bg-emerald-100'
+            : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'
+        }" data-cod="${r.cod}" data-id="${r.id}" data-act="${r.activo}">${r.activo}</button>`;
+
+        const fechaFinHtml = liberado
+          ? `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-900 font-mono text-[11px] font-medium border border-emerald-600">${r.fechaFin}</span>`
+          : `<span class="text-slate-400 text-[11px]">Vigente</span>`;
+
+        const acciones = `<div class="flex items-center justify-end gap-1.5">
+          <button type="button" class="btn-edit-maestro px-2.5 py-1 btn-dark text-xs font-medium" data-cod="${r.cod}">Editar</button>
+          <button type="button" class="btn-hist-maestro px-2.5 py-1 btn-outline text-xs font-medium" data-cod="${r.cod}">Histórico</button>
+        </div>`;
+
+        return [
+          `<span class="font-semibold text-slate-900">${r.intermediario || '—'}</span>`,
+          `<span class="font-mono font-semibold ${isActivo ? 'text-slate-900' : 'text-slate-400 line-through'}">${r.cod || '—'}</span>`,
+          `<span class="font-medium">${r.ejecutivo || '—'}</span>`,
+          `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
+          fechaFinHtml,
+          r.sucursal || '—',
+          r.lider || '—',
+          badgeActivo,
+          `<span class="font-mono">${r.cedula || '—'}</span>`,
+          r.correo || '—',
+          `<span class="font-mono text-[11px]">${r.fechaNac || '—'}</span>`,
+          `<span class="font-mono text-[11px]">${r.fechaAfiliacion || '—'}</span>`,
+          acciones
+        ];
+      });
+
+      if (dtMaestro) {
+        dtMaestro.clear().rows.add(dataRows).draw(false);
+      } else {
+        dtMaestro = $('#table-dt-maestro').DataTable({
+          ...dtConfigBase,
+          data: dataRows
+        });
+      }
+    }
+
+    // Vista 2: Histórico de control de intermediarios (12 columnas de negocio, sin IDs)
+    function renderTablaHistoricoMaestro() {
+      const dataRows = state.historicoMaestro.map(r => [
+        `<span class="font-semibold text-slate-900">${r.intermediario || '—'}</span>`,
+        `<span class="font-mono font-semibold">${r.cod || '—'}</span>`,
+        `<span class="font-medium text-slate-800">${r.ejecutivo || '—'}</span>`,
+        `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
+        `<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-mono text-[11px] font-semibold border border-slate-300">${r.fechaFin || '—'}</span>`,
+        r.sucursal || '—',
+        r.lider || '—',
+        r.activo || '—',
+        `<span class="font-mono">${r.cedula || '—'}</span>`,
+        r.correo || '—',
+        `<span class="font-mono text-[11px]">${r.fechaNac || '—'}</span>`,
+        `<span class="font-mono text-[11px]">${r.fechaAfiliacion || '—'}</span>`
+      ]);
+
+      if (dtHistoricoMaestro) {
+        dtHistoricoMaestro.clear().rows.add(dataRows).draw(false);
+      } else {
+        dtHistoricoMaestro = $('#table-dt-historico-maestro').DataTable({
+          ...dtConfigBase,
+          data: dataRows,
+          ordering: false
+        });
+      }
+    }
+
+    // Vista 3: Control de reclasificación (Sin ID Único visible)
+    function renderTablaReclasificacion() {
+      const fSuc = document.getElementById('filter-r-sucursal').value;
+      const fEje = document.getElementById('filter-r-ejecutivo').value;
+      const fLid = document.getElementById('filter-r-lider').value;
+      const fCan = document.getElementById('filter-r-canal').value;
+      const fVig = document.getElementById('filter-r-vigencia').value;
+      const fEst = document.getElementById('filter-r-estatus').value;
+
+      const filtrados = state.historial.filter(r => {
+        const vigente = !r.fechaFin || r.fechaFin === '';
+        const est = r.estatus || 'ACTIVO';
+        if (fSuc !== 'ALL' && r.sucursal !== fSuc) return false;
+        if (fEje !== 'ALL' && r.ejecutivo !== fEje) return false;
+        if (fLid !== 'ALL' && r.lider !== fLid) return false;
+        if (fCan !== 'ALL' && r.canal !== fCan) return false;
+        if (fVig === 'OPEN' && !vigente) return false;
+        if (fVig === 'CLOSED' && vigente) return false;
+        if (fEst !== 'ALL' && est !== fEst) return false;
+        return true;
+      });
+
+      const dataRows = filtrados.map(r => {
+        const vigente = !r.fechaFin || r.fechaFin === '';
+        const isCodActivo = (r.estatus || 'ACTIVO') === 'ACTIVO';
+
+        const estBtn = `<button type="button" class="btn-toggle-r-estatus px-2.5 py-0.5 text-[11px] font-mono font-semibold border ${
+          isCodActivo
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-700 hover:bg-emerald-100'
+            : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'
+        }" data-cod="${r.codigo}" data-est="${r.estatus}">${isCodActivo ? 'ACTIVO' : 'INACTIVO'}</button>`;
+
+        let acciones = '<div class="flex items-center justify-end gap-1.5">';
+        if (vigente) {
+          acciones += `<button type="button" class="btn-reclasificar-row px-2.5 py-1 btn-dark text-xs font-medium" data-cod="${r.codigo}">Reclasificar</button>`;
+        }
+        acciones += `<button type="button" class="btn-historico-r-row px-2.5 py-1 btn-outline text-xs font-medium" data-cod="${r.codigo}">Histórico</button>`;
+        acciones += `<button type="button" class="btn-editar-r-row px-2.5 py-1 btn-outline text-xs font-medium" data-id="${r.idUnico}">Editar</button>`;
+        acciones += '</div>';
+
+        return [
+          `<span class="font-mono font-semibold ${isCodActivo ? 'text-slate-900' : 'text-slate-400 line-through'}">${r.codigo || '—'}</span>`,
+          estBtn,
+          `<span class="font-semibold text-slate-900">${r.nombreIntermediario || '—'}</span>`,
+          r.nombreTomador || '—',
+          r.nombreAsegurado || '—',
+          r.sucursal || '—',
+          `<span class="font-medium">${r.ejecutivo || '—'}</span>`,
+          r.lider || '—',
+          r.canal || '—',
+          `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
+          vigente ? `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 font-semibold text-[11px] border border-emerald-600">Vigente</span>` : `<span class="font-mono text-[11px]">${r.fechaFin}</span>`,
+          r.registradoPor || '—',
+          `<span class="font-mono text-[11px] text-slate-500">${r.fechaHoraOperacion || '—'}</span>`,
+          acciones
+        ];
+      });
+
+      if (dtReclasificacion) {
+        dtReclasificacion.clear().rows.add(dataRows).draw(false);
+      } else {
+        dtReclasificacion = $('#table-dt-reclasificacion').DataTable({
+          ...dtConfigBase,
+          data: dataRows
+        });
+      }
+    }
+
+    async function sincronizarSegundoPlano(mostrarToast = false) {
+      const ind = document.getElementById('sync-indicator');
+      ind.classList.remove('hidden');
+      try {
+        const res = await apiCall('obtenerDatosSistema');
+        if (res && res.exito) {
+          aplicarDatosAlEstado(res);
+          if (mostrarToast) showToast('Sincronización completada.');
+        }
+      } catch (e) {
+        if (mostrarToast) showToast(e.message, true);
+      } finally {
+        ind.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // MODALES DE GESTIÓN 1: CONTROL DE INTERMEDIARIOS
+    // =========================================================================
+    function abrirModalMaestro(reg = null) {
+      const form = document.getElementById('maestro-form');
+      form.reset();
+      document.getElementById('form-m-error').classList.add('hidden');
+      document.getElementById('form-m-correo-custom').classList.add('hidden');
+      const aviso = document.getElementById('aviso-bloqueo-ejecutivo');
+      const hoy = new Date().toISOString().slice(0, 10);
+
+      if (!reg) {
+        state.editingMaestroOriginal = null;
+        document.getElementById('modal-maestro-title').textContent = 'Nuevo intermediario';
+        document.getElementById('form-m-id').value = '';
+        document.getElementById('form-m-activo').value = 'SI';
+        document.getElementById('form-m-fechainicio').value = hoy;
+        aviso.classList.add('hidden');
+      } else {
+        state.editingMaestroOriginal = reg;
+        document.getElementById('modal-maestro-title').textContent = `Editar intermediario — Código ${reg.cod}`;
+        document.getElementById('form-m-id').value = reg.id || '';
+        document.getElementById('form-m-cod').value = reg.cod || '';
+        document.getElementById('form-m-activo').value = reg.activo || 'SI';
+        document.getElementById('form-m-intermediario').value = reg.intermediario || '';
+
+        ['ejecutivo', 'sucursal', 'lider'].forEach(campo => {
+          const val = reg[campo] || '';
+          const sel = document.getElementById(`form-m-${campo}`);
+          if (val && !Array.from(sel.options).some(o => o.value === val)) {
+            sel.appendChild(new Option(val, val));
+          }
+          sel.value = val;
+        });
+
+        document.getElementById('form-m-fechainicio').value = reg.fechaInicio || '';
+        document.getElementById('form-m-fechafin').value = reg.fechaFin || '';
+        document.getElementById('form-m-fechanac').value = reg.fechaNac || '';
+        document.getElementById('form-m-fechaafiliacion').value = reg.fechaAfiliacion || '';
+
+        if (reg.cedula) {
+          const m = reg.cedula.match(/^(V-|E-|J-|G-|P-|C-)(.*)$/i);
+          if (m) {
+            document.getElementById('form-m-cedula-tipo').value = m[1].toUpperCase();
+            document.getElementById('form-m-cedula-num').value = m[2];
+          } else {
+            document.getElementById('form-m-cedula-num').value = reg.cedula;
+          }
+        }
+
+        if (reg.correo && reg.correo.includes('@')) {
+          const idx = reg.correo.indexOf('@');
+          const userPart = reg.correo.slice(0, idx);
+          const domPart = reg.correo.slice(idx);
+          document.getElementById('form-m-correo-user').value = userPart;
+          const domSel = document.getElementById('form-m-correo-domain');
+          if (Array.from(domSel.options).some(o => o.value === domPart)) {
+            domSel.value = domPart;
+          } else {
+            domSel.value = 'custom';
+            const customInp = document.getElementById('form-m-correo-custom');
+            customInp.value = domPart;
+            customInp.classList.remove('hidden');
+          }
+        } else {
+          document.getElementById('form-m-correo-user').value = reg.correo || '';
+        }
+
+        const tieneFechaFinGuardada = Boolean(reg.fechaFin && reg.fechaFin.trim() !== '');
+        aviso.classList.remove('hidden');
+        if (!tieneFechaFinGuardada && reg.ejecutivo) {
+          aviso.innerHTML = `<strong>Ejecutivo vigente (${reg.ejecutivo}):</strong> Para asignar otro ejecutivo a este intermediario, primero registre su <strong>Fecha Fin</strong> y guarde para liberarlo.`;
+        } else {
+          aviso.innerHTML = `<strong>Intermediario liberado (Fecha Fin: ${reg.fechaFin || 'N/A'}):</strong> Al seleccionar un nuevo ejecutivo y guardar, la gestión de <strong>${reg.ejecutivo}</strong> se archivará en <em>Histórico de control de intermediarios</em>.`;
+        }
+      }
+
+      document.getElementById('modal-maestro-overlay').classList.remove('hidden');
+    }
+
+    function abrirModalHistoricoMaestroPorCodigo(cod) {
+      const cleanCod = String(cod || '').trim().toUpperCase();
+      const actual = state.maestro.filter(x => String(x.cod).toUpperCase() === cleanCod);
+      const previos = state.historicoMaestro.filter(x => String(x.cod).toUpperCase() === cleanCod);
+
+      document.getElementById('history-m-title').textContent = `Histórico del Intermediario — Código ${cleanCod}`;
+      document.getElementById('history-m-subtitle').textContent = `${actual.length} asignación actual · ${previos.length} asignaciones anteriores cerradas`;
+
+      const tbody = document.getElementById('history-m-tbody');
+      tbody.innerHTML = '';
+
+      actual.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'bg-emerald-50/40 font-semibold';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">${r.intermediario || '—'}</td>
+          <td class="py-2.5 px-3 font-mono">${r.cod || '—'}</td>
+          <td class="py-2.5 px-3 text-slate-900">${r.ejecutivo || '—'}</td>
+          <td class="py-2.5 px-3">${r.sucursal || '—'} / ${r.lider || '—'}</td>
+          <td class="py-2.5 px-3 font-mono">${r.fechaInicio || '—'} → ${r.fechaFin || 'Vigente'}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-emerald-50 border border-emerald-700 text-emerald-900 text-[11px]">Actual</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      previos.forEach(h => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">${h.intermediario || '—'}</td>
+          <td class="py-2.5 px-3 font-mono">${h.cod || '—'}</td>
+          <td class="py-2.5 px-3 font-medium">${h.ejecutivo || '—'}</td>
+          <td class="py-2.5 px-3">${h.sucursal || '—'} / ${h.lider || '—'}</td>
+          <td class="py-2.5 px-3 font-mono">${h.fechaInicio || '—'} → ${h.fechaFin || '—'}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-300 text-slate-700 text-[11px]">Cerrado</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (actual.length === 0 && previos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">Sin registros para este código.</td></tr>`;
+      }
+
+      document.getElementById('history-maestro-overlay').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // MODALES DE GESTIÓN 2: CONTROL DE RECLASIFICACIÓN (SIN MOSTRAR IDs)
+    // =========================================================================
+    function poblarSelectorExistentesReclasificacion(selectedCodigo) {
+      const sel = document.getElementById('form-r-existing-select');
+      sel.innerHTML = '<option value="__NEW__">+ Crear nuevo registro de reclasificación</option>';
+      const vigentesMap = new Map();
+      state.historial.forEach(r => {
+        if (!r.fechaFin || r.fechaFin === '') {
+          vigentesMap.set(r.codigo, r);
+        }
+      });
+      vigentesMap.forEach((reg, cod) => {
+        const opt = document.createElement('option');
+        opt.value = cod;
+        opt.textContent = `Reclasificar código ${cod} — ${reg.nombreIntermediario} (${reg.ejecutivo})`;
+        sel.appendChild(opt);
+      });
+      sel.value = (selectedCodigo && vigentesMap.has(selectedCodigo)) ? selectedCodigo : '__NEW__';
+    }
+
+    function actualizarCajaCierreReclasificacion() {
+      const modo = document.getElementById('form-r-modo').value;
+      const box = document.getElementById('r-closure-box');
+      if (modo === 'EDIT_ROW') {
+        box.classList.add('hidden');
+        return;
+      }
+      const codigo = document.getElementById('form-r-codigo').value.trim().toUpperCase();
+      const fechaInicioNueva = document.getElementById('form-r-fechainicio').value;
+      const vigente = obtenerVigenteReclasificacionPorCodigo(codigo);
+
+      if (vigente) {
+        box.classList.remove('hidden');
+        document.getElementById('r-current-summary').innerHTML =
+          `Asignación vigente actual: <strong>${vigente.sucursal}</strong> · Ejecutivo: <strong>${vigente.ejecutivo}</strong> · Inicio: <span class="font-mono">${vigente.fechaInicio}</span>`;
+        if (fechaInicioNueva) {
+          document.getElementById('form-r-fecha-cierre-ant').value = restarUnDia(fechaInicioNueva);
+        }
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function abrirModalNuevaReclasificacion(codigoPreseleccionado = '') {
+      const hoy = new Date().toISOString().slice(0, 10);
+      document.getElementById('reclasificacion-form').reset();
+      document.getElementById('form-r-modo').value = 'NEW_OR_RECLASSIFY';
+      document.getElementById('form-r-edit-id').value = '';
+      document.getElementById('r-quick-select-box').classList.remove('hidden');
+      document.getElementById('form-r-error').classList.add('hidden');
+
+      poblarSelectorExistentesReclasificacion(codigoPreseleccionado);
+
+      const vigente = codigoPreseleccionado ? obtenerVigenteReclasificacionPorCodigo(codigoPreseleccionado) : null;
+      if (vigente) {
+        document.getElementById('modal-r-title').textContent = `Reclasificar código ${vigente.codigo}`;
+        document.getElementById('form-r-codigo').value = vigente.codigo;
+        document.getElementById('form-r-estatus').value = vigente.estatus || 'ACTIVO';
+        document.getElementById('form-r-nombre').value = vigente.nombreIntermediario || '';
+        document.getElementById('form-r-tomador').value = vigente.nombreTomador || '';
+        document.getElementById('form-r-asegurado').value = vigente.nombreAsegurado || '';
+        document.getElementById('form-r-sucursal').value = vigente.sucursal || '';
+        document.getElementById('form-r-ejecutivo').value = vigente.ejecutivo || '';
+        document.getElementById('form-r-lider').value = vigente.lider || '';
+        document.getElementById('form-r-canal').value = vigente.canal || '';
+      } else {
+        document.getElementById('modal-r-title').textContent = 'Nuevo registro en Control de reclasificación';
+        document.getElementById('form-r-estatus').value = 'ACTIVO';
+      }
+
+      document.getElementById('form-r-fechainicio').value = hoy;
+      document.getElementById('form-r-fechafin').value = '';
+      document.getElementById('form-r-fecha-cierre-ant').value = restarUnDia(hoy);
+
+      actualizarCajaCierreReclasificacion();
+      document.getElementById('modal-reclasificacion-overlay').classList.remove('hidden');
+    }
+
+    function abrirModalHistoricoReclasificacion(codigo) {
+      const cleanCod = String(codigo || '').trim().toUpperCase();
+      state.selectedHistoryRCodigo = cleanCod;
+
+      const registros = state.historial.filter(r => String(r.codigo || '').toUpperCase() === cleanCod);
+      const logs = state.bitacora.filter(b => String(b.codigoIntermediario || '').toUpperCase() === cleanCod);
+      const nombreInt = registros.length > 0 ? registros[registros.length - 1].nombreIntermediario : cleanCod;
+
+      document.getElementById('history-r-title').textContent = `Histórico de Reclasificaciones — Código ${cleanCod}`;
+      document.getElementById('history-r-subtitle').textContent = `${nombreInt} · ${registros.length} periodos registrados`;
+
+      const tbodyTimeline = document.getElementById('history-r-timeline-tbody');
+      tbodyTimeline.innerHTML = '';
+      registros.forEach(r => {
+        const isVig = !r.fechaFin || r.fechaFin === '';
+        const tr = document.createElement('tr');
+        tr.className = isVig ? 'bg-emerald-50/40 font-semibold' : 'bg-white text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono">${r.estatus || 'ACTIVO'}</td>
+          <td class="py-2.5 px-3 text-slate-900">${r.nombreIntermediario || '—'}</td>
+          <td class="py-2.5 px-3"><div>T: ${r.nombreTomador || '—'}</div><div>A: ${r.nombreAsegurado || '—'}</div></td>
+          <td class="py-2.5 px-3">${r.sucursal || '—'}</td>
+          <td class="py-2.5 px-3 text-slate-900">${r.ejecutivo || '—'}</td>
+          <td class="py-2.5 px-3"><div>L: ${r.lider || '—'}</div><div>C: ${r.canal || '—'}</div></td>
+          <td class="py-2.5 px-3 font-mono">${r.fechaInicio || '—'} → ${isVig ? '<span class="text-emerald-800 font-bold">Vigente</span>' : r.fechaFin}</td>
+          <td class="py-2.5 px-3 text-[11px]">${r.registradoPor || '—'}<div class="text-slate-400 font-mono">${r.fechaHoraOperacion || ''}</div></td>
+        `;
+        tbodyTimeline.appendChild(tr);
+      });
+
+      const tbodyAudit = document.getElementById('history-r-audit-tbody');
+      tbodyAudit.innerHTML = '';
+      if (logs.length === 0) {
+        tbodyAudit.innerHTML = '<tr><td colspan="5" class="py-4 px-3 text-center text-slate-400">Sin movimientos registrados para este código.</td></tr>';
+      } else {
+        logs.forEach(b => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 font-mono whitespace-nowrap">${b.fecha} ${b.hora}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-900">${b.usuario}</td>
+            <td class="py-2.5 px-3">${b.tipoOperacion}</td>
+            <td class="py-2.5 px-3 text-slate-500">${ocultarIdsEnTexto(b.datoAnterior)}</td>
+            <td class="py-2.5 px-3 text-slate-900 font-medium">${ocultarIdsEnTexto(b.datoNuevo)}</td>
+          `;
+          tbodyAudit.appendChild(tr);
+        });
+      }
+
+      document.getElementById('history-reclasificacion-overlay').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // EVENTOS DEL DOM
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      document.getElementById('swal-btn-cancel').addEventListener('click', () => {
+        document.getElementById('swal-overlay').classList.add('hidden');
+        swalConfirmCallback = null;
+      });
+      document.getElementById('swal-btn-confirm').addEventListener('click', () => {
+        const cb = swalConfirmCallback;
+        document.getElementById('swal-overlay').classList.add('hidden');
+        swalConfirmCallback = null;
+        if (cb) cb();
+      });
+
+      // Restaurar sesión desde caché
+      const cachedUser = sessionStorage.getItem(USER_KEY);
+      const cachedData = sessionStorage.getItem(CACHE_KEY);
+      if (cachedUser && cachedData) {
+        try {
+          state.currentUser = JSON.parse(cachedUser);
+          document.getElementById('header-user-name').textContent = state.currentUser.nombre;
+          document.getElementById('header-user-role').textContent = state.currentUser.rol;
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('app-screen').classList.remove('hidden');
+          aplicarDatosAlEstado(JSON.parse(cachedData));
+          sincronizarSegundoPlano(false);
+        } catch (e) {}
+      }
+
+      document.getElementById('btn-toggle-pass').addEventListener('click', () => {
+        const inp = document.getElementById('login-password');
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+      });
+
+      // Login
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errBox = document.getElementById('login-error-box');
+        errBox.classList.add('hidden');
+        document.getElementById('login-btn-text').classList.add('hidden');
+        document.getElementById('login-loading').classList.remove('hidden');
+
+        try {
+          const res = await apiCall('loginAndSync', {
+            username: document.getElementById('login-username').value.trim(),
+            password: document.getElementById('login-password').value.trim()
+          });
+
+          if (res && res.exito) {
+            state.currentUser = res.usuario;
+            sessionStorage.setItem(USER_KEY, JSON.stringify(res.usuario));
+            document.getElementById('header-user-name').textContent = res.usuario.nombre;
+            document.getElementById('header-user-role').textContent = res.usuario.rol;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            aplicarDatosAlEstado(res);
+            showToast('Acceso autorizado.');
+          } else {
+            errBox.textContent = (res && res.mensaje) || 'Credenciales incorrectas.';
+            errBox.classList.remove('hidden');
+          }
+        } catch (err) {
+          errBox.textContent = err.message;
+          errBox.classList.remove('hidden');
+        } finally {
+          document.getElementById('login-btn-text').classList.remove('hidden');
+          document.getElementById('login-loading').classList.add('hidden');
+        }
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        sessionStorage.removeItem(USER_KEY);
+        sessionStorage.removeItem(CACHE_KEY);
+        state.currentUser = null;
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+      });
+
+      // Navegación entre las 3 pestañas
+      const tabSections = ['tab-maestro', 'tab-historico-maestro', 'tab-reclasificacion'];
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab');
+          document.querySelectorAll('[data-tab]').forEach(b => {
+            const activo = b.getAttribute('data-tab') === target;
+            b.className = activo
+              ? 'nav-tab nav-tab-active py-4 text-xs flex items-center gap-2'
+              : 'nav-tab py-4 text-xs flex items-center gap-2';
+          });
+          tabSections.forEach(sec => {
+            document.getElementById(sec).classList.toggle('hidden', sec !== target);
+          });
+        });
+      });
+
+      document.querySelectorAll('.btn-sync-now').forEach(b => {
+        b.addEventListener('click', () => sincronizarSegundoPlano(true));
+      });
+
+      // Filtros Control de intermediarios
+      ['filter-m-sucursal', 'filter-m-ejecutivo', 'filter-m-lider', 'filter-m-activo'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderTablaMaestro);
+      });
+      document.getElementById('btn-clear-m-filters').addEventListener('click', () => {
+        ['filter-m-sucursal', 'filter-m-ejecutivo', 'filter-m-lider', 'filter-m-activo'].forEach(id => {
+          document.getElementById(id).value = 'ALL';
+        });
+        renderTablaMaestro();
+      });
+
+      // Filtros Control de reclasificación
+      ['filter-r-sucursal', 'filter-r-ejecutivo', 'filter-r-lider', 'filter-r-canal', 'filter-r-vigencia', 'filter-r-estatus'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderTablaReclasificacion);
+      });
+      document.getElementById('btn-clear-r-filters').addEventListener('click', () => {
+        ['filter-r-sucursal', 'filter-r-ejecutivo', 'filter-r-lider', 'filter-r-canal', 'filter-r-vigencia', 'filter-r-estatus'].forEach(id => {
+          document.getElementById(id).value = 'ALL';
+        });
+        renderTablaReclasificacion();
+      });
+
+      // Dominio de correo personalizado
+      document.getElementById('form-m-correo-domain').addEventListener('change', (e) => {
+        const customInp = document.getElementById('form-m-correo-custom');
+        if (e.target.value === 'custom') {
+          customInp.classList.remove('hidden');
+          customInp.focus();
+        } else {
+          customInp.classList.add('hidden');
+        }
+      });
+
+      // Eventos Modal Control de intermediarios
+      document.getElementById('btn-nuevo-maestro').addEventListener('click', () => abrirModalMaestro(null));
+      const cerrarModalM = () => document.getElementById('modal-maestro-overlay').classList.add('hidden');
+      document.getElementById('btn-cerrar-modal-maestro').addEventListener('click', cerrarModalM);
+      document.getElementById('btn-cancel-modal-maestro').addEventListener('click', cerrarModalM);
+      document.getElementById('btn-close-history-m').addEventListener('click', () => {
+        document.getElementById('history-maestro-overlay').classList.add('hidden');
+      });
+
+      // Acciones en Tabla Control de intermediarios
+      $('#table-dt-maestro tbody').on('click', '.btn-edit-maestro', function () {
+        const cod = String($(this).data('cod'));
+        const reg = state.maestro.find(x => String(x.cod) === cod);
+        if (reg) abrirModalMaestro(reg);
+      }).on('click', '.btn-hist-maestro', function () {
+        const cod = String($(this).data('cod'));
+        abrirModalHistoricoMaestroPorCodigo(cod);
+      }).on('click', '.btn-toggle-m-activo', function () {
+        const cod = String($(this).data('cod'));
+        const id = String($(this).data('id'));
+        const act = String($(this).data('act'));
+        const nuevo = act === 'SI' ? 'NO' : 'SI';
+        showConfirm(
+          `Cambiar condición a ${nuevo}`,
+          `El intermediario con código ${cod} pasará a estado ACTIVO = ${nuevo}.`,
+          async () => {
+            try {
+              const res = await apiCall('cambiarEstatusIntermediarioMaestro', {
+                cod, id, nuevoEstatus: nuevo,
+                usuario: state.currentUser?.username || 'operadora',
+                rol: state.currentUser?.rol || 'Operadora'
+              });
+              if (res && res.exito) {
+                aplicarDatosAlEstado(res);
+                showToast(res.mensaje);
+              }
+            } catch (err) {
+              showToast(err.message, true);
+            }
+          }
+        );
+      });
+
+      // Guardar Control de intermediarios
+      document.getElementById('maestro-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errBox = document.getElementById('form-m-error');
+        errBox.classList.add('hidden');
+
+        const orig = state.editingMaestroOriginal;
+        const nuevoEjecutivo = document.getElementById('form-m-ejecutivo').value.trim();
+
+        if (orig && orig.ejecutivo && orig.ejecutivo !== nuevoEjecutivo && (!orig.fechaFin || orig.fechaFin === '')) {
+          errBox.textContent = `Operación no permitida: El ejecutivo actual (${orig.ejecutivo}) no posee Fecha Fin. Primero asigne su Fecha Fin y guarde para liberar al intermediario antes de asignar otro ejecutivo.`;
+          errBox.classList.remove('hidden');
+          return;
+        }
+
+        const cedTipo = document.getElementById('form-m-cedula-tipo').value;
+        const cedNum = document.getElementById('form-m-cedula-num').value.trim();
+        const correoUser = document.getElementById('form-m-correo-user').value.trim();
+        const correoDom = document.getElementById('form-m-correo-domain').value;
+        let domFinal = correoDom;
+        if (correoDom === 'custom') {
+          domFinal = document.getElementById('form-m-correo-custom').value.trim();
+          if (domFinal && !domFinal.startsWith('@')) domFinal = '@' + domFinal;
+        }
+
+        const payload = {
+          id: document.getElementById('form-m-id').value,
+          cod: document.getElementById('form-m-cod').value.trim().toUpperCase(),
+          intermediario: document.getElementById('form-m-intermediario').value.trim(),
+          ejecutivo: nuevoEjecutivo,
+          sucursal: document.getElementById('form-m-sucursal').value.trim(),
+          lider: document.getElementById('form-m-lider').value.trim(),
+          activo: document.getElementById('form-m-activo').value,
+          cedula: cedNum ? (cedTipo + cedNum) : '',
+          correo: correoUser ? (correoUser + domFinal) : '',
+          fechaInicio: document.getElementById('form-m-fechainicio').value,
+          fechaFin: document.getElementById('form-m-fechafin').value,
+          fechaNac: document.getElementById('form-m-fechanac').value,
+          fechaAfiliacion: document.getElementById('form-m-fechaafiliacion').value,
+          usuario: state.currentUser?.username || 'operadora',
+          rol: state.currentUser?.rol || 'Operadora'
+        };
+
+        document.getElementById('save-maestro-text').classList.add('hidden');
+        document.getElementById('save-maestro-loading').classList.remove('hidden');
+
+        try {
+          const res = await apiCall('guardarIntermediarioMaestro', payload);
+          if (res && res.exito) {
+            aplicarDatosAlEstado(res);
+            cerrarModalM();
+            showToast(res.mensaje);
+          } else {
+            errBox.textContent = (res && res.mensaje) || 'Error al guardar.';
+            errBox.classList.remove('hidden');
+          }
+        } catch (err) {
+          errBox.textContent = err.message;
+          errBox.classList.remove('hidden');
+        } finally {
+          document.getElementById('save-maestro-text').classList.remove('hidden');
+          document.getElementById('save-maestro-loading').classList.add('hidden');
+        }
+      });
+
+      // =======================================================================
+      // EVENTOS GESTIÓN 2: CONTROL DE RECLASIFICACIÓN
+      // =======================================================================
+      const cerrarModalR = () => document.getElementById('modal-reclasificacion-overlay').classList.add('hidden');
+      document.getElementById('btn-cerrar-modal-r').addEventListener('click', cerrarModalR);
+      document.getElementById('btn-cancel-modal-r').addEventListener('click', cerrarModalR);
+
+      document.getElementById('btn-nueva-reclasificacion').addEventListener('click', () => {
+        abrirModalNuevaReclasificacion('');
+      });
+
+      document.getElementById('form-r-existing-select').addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === '__NEW__') {
+          document.getElementById('form-r-codigo').value = '';
+          document.getElementById('form-r-nombre').value = '';
+          document.getElementById('form-r-tomador').value = '';
+          document.getElementById('form-r-asegurado').value = '';
+          document.getElementById('form-r-estatus').value = 'ACTIVO';
+        } else {
+          const vig = obtenerVigenteReclasificacionPorCodigo(val);
+          if (vig) {
+            document.getElementById('form-r-codigo').value = vig.codigo;
+            document.getElementById('form-r-nombre').value = vig.nombreIntermediario || '';
+            document.getElementById('form-r-tomador').value = vig.nombreTomador || '';
+            document.getElementById('form-r-asegurado').value = vig.nombreAsegurado || '';
+            document.getElementById('form-r-estatus').value = vig.estatus || 'ACTIVO';
+            document.getElementById('form-r-sucursal').value = vig.sucursal || '';
+            document.getElementById('form-r-ejecutivo').value = vig.ejecutivo || '';
+            document.getElementById('form-r-lider').value = vig.lider || '';
+            document.getElementById('form-r-canal').value = vig.canal || '';
+          }
+        }
+        actualizarCajaCierreReclasificacion();
+      });
+
+      document.getElementById('form-r-codigo').addEventListener('input', () => {
+        const cod = document.getElementById('form-r-codigo').value.trim().toUpperCase();
+        const vig = obtenerVigenteReclasificacionPorCodigo(cod);
+        if (vig && !document.getElementById('form-r-nombre').value) {
+          document.getElementById('form-r-nombre').value = vig.nombreIntermediario || '';
+          document.getElementById('form-r-tomador').value = vig.nombreTomador || '';
+          document.getElementById('form-r-asegurado').value = vig.nombreAsegurado || '';
+          document.getElementById('form-r-estatus').value = vig.estatus || 'ACTIVO';
+        }
+        actualizarCajaCierreReclasificacion();
+      });
+
+      document.getElementById('form-r-fechainicio').addEventListener('change', actualizarCajaCierreReclasificacion);
+
+      // Botones dentro de la tabla Control de reclasificación
+      $('#table-dt-reclasificacion tbody').on('click', '.btn-reclasificar-row', function () {
+        const cod = String($(this).data('cod'));
+        abrirModalNuevaReclasificacion(cod);
+      }).on('click', '.btn-historico-r-row', function () {
+        const cod = String($(this).data('cod'));
+        abrirModalHistoricoReclasificacion(cod);
+      }).on('click', '.btn-editar-r-row', function () {
+        const id = String($(this).data('id'));
+        const reg = state.historial.find(x => String(x.idUnico) === id);
+        if (!reg) return;
+        document.getElementById('reclasificacion-form').reset();
+        document.getElementById('form-r-modo').value = 'EDIT_ROW';
+        document.getElementById('form-r-edit-id').value = reg.idUnico;
+        document.getElementById('r-quick-select-box').classList.add('hidden');
+        document.getElementById('r-closure-box').classList.add('hidden');
+        document.getElementById('modal-r-title').textContent = `Editar registro — Código ${reg.codigo}`;
+
+        document.getElementById('form-r-codigo').value = reg.codigo;
+        document.getElementById('form-r-estatus').value = reg.estatus || 'ACTIVO';
+        document.getElementById('form-r-nombre').value = reg.nombreIntermediario || '';
+        document.getElementById('form-r-tomador').value = reg.nombreTomador || '';
+        document.getElementById('form-r-asegurado').value = reg.nombreAsegurado || '';
+        document.getElementById('form-r-sucursal').value = reg.sucursal || '';
+        document.getElementById('form-r-ejecutivo').value = reg.ejecutivo || '';
+        document.getElementById('form-r-lider').value = reg.lider || '';
+        document.getElementById('form-r-canal').value = reg.canal || '';
+        document.getElementById('form-r-fechainicio').value = reg.fechaInicio || '';
+        document.getElementById('form-r-fechafin').value = reg.fechaFin || '';
+        document.getElementById('form-r-error').classList.add('hidden');
+        document.getElementById('modal-reclasificacion-overlay').classList.remove('hidden');
+      }).on('click', '.btn-toggle-r-estatus', function () {
+        const cod = String($(this).data('cod'));
+        const est = String($(this).data('est') || 'ACTIVO');
+        const nuevo = est === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+        showConfirm(
+          `Cambiar estatus a ${nuevo}`,
+          `Todos los registros del código ${cod} en Control de reclasificación pasarán a estatus ${nuevo}.`,
+          async () => {
+            try {
+              const res = await apiCall('cambiarEstatusIntermediario', {
+                codigo: cod,
+                nuevoEstatus: nuevo,
+                usuario: state.currentUser?.username || 'supervisor',
+                rol: state.currentUser?.rol || 'Supervisor'
+              });
+              if (res && res.exito) {
+                aplicarDatosAlEstado(res);
+                showToast(res.mensaje);
+              }
+            } catch (err) {
+              showToast(err.message, true);
+            }
+          }
+        );
+      });
+
+      document.getElementById('btn-close-history-r').addEventListener('click', () => {
+        document.getElementById('history-reclasificacion-overlay').classList.add('hidden');
+      });
+      document.getElementById('btn-reclassify-from-history').addEventListener('click', () => {
+        const cod = state.selectedHistoryRCodigo;
+        document.getElementById('history-reclasificacion-overlay').classList.add('hidden');
+        if (cod) abrirModalNuevaReclasificacion(cod);
+      });
+
+      // Guardar en Control de reclasificación
+      document.getElementById('reclasificacion-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errBox = document.getElementById('form-r-error');
+        errBox.classList.add('hidden');
+        document.getElementById('save-r-text').classList.add('hidden');
+        document.getElementById('save-r-loading').classList.remove('hidden');
+
+        try {
+          const res = await apiCall('guardarOperacionHistorial', {
+            modo: document.getElementById('form-r-modo').value,
+            editId: document.getElementById('form-r-edit-id').value,
+            codigo: document.getElementById('form-r-codigo').value.trim().toUpperCase(),
+            estatus: document.getElementById('form-r-estatus').value,
+            nombreIntermediario: document.getElementById('form-r-nombre').value.trim(),
+            nombreTomador: document.getElementById('form-r-tomador').value.trim(),
+            nombreAsegurado: document.getElementById('form-r-asegurado').value.trim(),
+            sucursal: document.getElementById('form-r-sucursal').value,
+            ejecutivo: document.getElementById('form-r-ejecutivo').value,
+            lider: document.getElementById('form-r-lider').value,
+            canal: document.getElementById('form-r-canal').value,
+            fechaInicio: document.getElementById('form-r-fechainicio').value,
+            fechaFin: document.getElementById('form-r-fechafin').value,
+            fechaCierreAnterior: document.getElementById('form-r-fecha-cierre-ant').value,
+            usuario: state.currentUser?.username || 'operadora',
+            rol: state.currentUser?.rol || 'Operadora'
+          });
+
+          if (res && res.exito) {
+            aplicarDatosAlEstado(res);
+            cerrarModalR();
+            showToast(res.mensaje);
+          } else {
+            errBox.textContent = (res && res.mensaje) || 'Error al guardar.';
+            errBox.classList.remove('hidden');
+          }
+        } catch (err) {
+          errBox.textContent = err.message;
+          errBox.classList.remove('hidden');
+        } finally {
+          document.getElementById('save-r-text').classList.remove('hidden');
+          document.getElementById('save-r-loading').classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
