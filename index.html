@@ -16,648 +16,298 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
-      -webkit-font-smoothing: antialiased;
-    }
-    .surface-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.875rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 4px 12px rgba(15, 23, 42, 0.02);
-    }
-    .btn-primary {
-      background-color: #0f172a;
-      color: #ffffff;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .btn-primary:hover {
-      background-color: #1e293b;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-    }
-    .btn-secondary {
-      background-color: #ffffff;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      transition: all 0.18s ease;
-    }
-    .btn-secondary:hover {
-      background-color: #f1f5f9;
-      color: #0f172a;
-      border-color: #94a3b8;
-    }
-    .input-clean {
-      background-color: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 0.625rem;
-      color: #0f172a;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
-    }
-    .input-clean:focus {
-      outline: none;
-      border-color: #0f172a;
-      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
-    }
-    .modal-enter { animation: modalFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .toast-enter { animation: toastFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes modalFade {
-      from { opacity: 0; transform: scale(0.97) translateY(6px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    @keyframes toastFade {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .scroll-clean::-webkit-scrollbar { width: 6px; height: 6px; }
-    .scroll-clean::-webkit-scrollbar-track { background: transparent; }
-    .scroll-clean::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; color: #0f172a; }
+    
+    /* Nueva Paleta: Azul Marino y Azul Claro */
+    .surface-card { background: #ffffff; border: 1px solid #e0e7ff; border-radius: 0.875rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .bg-navy { background-color: #172554; } /* blue-950 */
+    .text-navy { color: #172554; }
+    
+    .btn-primary { background-color: #172554; color: #ffffff; transition: all 0.2s; }
+    .btn-primary:hover { background-color: #1e3a8a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2); }
+    
+    .btn-secondary { background-color: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; transition: all 0.2s; }
+    .btn-secondary:hover { background-color: #dbeafe; border-color: #93c5fd; }
+    
+    .btn-success { background-color: #059669; color: #ffffff; transition: all 0.2s; }
+    .btn-success:hover { background-color: #047857; }
 
-    /* Estilos DataTables */
-    .dataTables_wrapper { padding: 0.75rem 1rem 1rem 1rem; font-size: 0.75rem; color: #334155; }
-    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter { margin-bottom: 0.75rem; }
-    .dataTables_wrapper .dataTables_length select { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.25rem 1.5rem 0.25rem 0.5rem; background-color: #ffffff; }
-    .dataTables_wrapper .dataTables_filter input { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.35rem 0.65rem; background-color: #ffffff; outline: none; }
-    .dataTables_wrapper .dataTables_filter input:focus { border-color: #0f172a; }
-    .dataTables_wrapper .dataTables_info { padding-top: 0.75rem; color: #64748b; font-size: 0.75rem; }
-    .dataTables_wrapper .dataTables_paginate { padding-top: 0.75rem; }
-    .dataTables_wrapper .dataTables_paginate .paginate_button { padding: 0.25rem 0.65rem !important; border-radius: 0.5rem !important; border: 1px solid #e2e8f0 !important; background: #ffffff !important; color: #334155 !important; font-size: 0.75rem !important; margin-left: 0.25rem !important; }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; }
-    table.dataTable.no-footer { border-bottom: 1px solid #e2e8f0 !important; }
-    table.dataTable thead th { border-bottom: 1px solid #e2e8f0 !important; background-color: #f8fafc; font-weight: 600; color: #64748b; text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.05em; }
-    table.dataTable tbody td { padding: 0.65rem 0.75rem !important; border-bottom: 1px solid #f1f5f9; }
+    .input-clean { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 0.5rem; transition: all 0.2s; }
+    .input-clean:focus { outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
+    
+    /* DataTables Customization */
+    .dataTables_wrapper { padding: 1rem; font-size: 0.75rem; color: #334155; }
+    table.dataTable thead th { background-color: #eff6ff; color: #1e3a8a; border-bottom: 2px solid #bfdbfe !important; font-weight: 600; text-transform: uppercase; }
+    table.dataTable tbody td { border-bottom: 1px solid #f1f5f9; padding: 0.75rem !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #172554 !important; color: white !important; border: none !important; border-radius: 0.375rem !important; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Notificaciones Toast y Confirmación -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
-  <div id="swal-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-sm w-full p-6 text-center space-y-4 modal-enter">
-      <h3 id="swal-title" class="text-base font-semibold text-slate-900">Confirmación</h3>
-      <p id="swal-text" class="text-xs sm:text-sm text-slate-600 leading-relaxed"></p>
-      <div class="flex items-center justify-center gap-2.5 pt-2">
-        <button type="button" id="swal-btn-cancel" class="hidden px-4 py-2 rounded-lg btn-secondary text-xs font-medium">Cancelar</button>
-        <button type="button" id="swal-btn-confirm" class="px-5 py-2 rounded-lg btn-primary text-xs font-medium">Confirmar</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- 1. PANTALLA DE ACCESO (LOGIN) -->
-  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
-    <div class="w-full max-w-sm surface-card p-8 modal-enter">
-      <div class="mb-7">
-        <div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-semibold text-xs mb-4">CR</div>
-        <h1 class="text-lg font-semibold text-slate-900 tracking-tight">Control de Reclasificación</h1>
-        <p class="text-xs text-slate-500 mt-1">Ingresa con tus credenciales para continuar</p>
-      </div>
-      <form id="login-form" class="space-y-4" novalidate>
-        <div id="login-error-box" class="hidden p-3 rounded-lg bg-slate-100 border border-slate-300 text-xs text-slate-800 font-medium"></div>
+  <!-- PANTALLA DE ACCESO -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-blue-50/50">
+    <div class="w-full max-w-sm surface-card p-8 text-center">
+      <div class="w-12 h-12 rounded-xl bg-navy text-white flex items-center justify-center font-bold text-lg mx-auto mb-4">CR</div>
+      <h1 class="text-xl font-bold text-navy tracking-tight">Control Corporativo</h1>
+      <p class="text-xs text-slate-500 mt-1 mb-6">Inicia sesión para continuar</p>
+      
+      <form id="login-form" class="space-y-4 text-left">
+        <div id="login-error-box" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium text-center"></div>
         <div>
-          <label for="login-username" class="block text-xs font-medium text-slate-700 mb-1.5">Usuario</label>
-          <input id="login-username" type="text" required autocomplete="username" placeholder="Usuario" class="w-full px-3.5 py-2.5 text-sm input-clean" />
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Usuario</label>
+          <input id="login-username" type="text" required class="w-full px-3 py-2 text-sm input-clean" />
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="login-password" class="block text-xs font-medium text-slate-700">Contraseña</label>
-            <button type="button" id="btn-toggle-pass" class="text-xs text-slate-500 hover:text-slate-900 transition">Mostrar</button>
-          </div>
-          <input id="login-password" type="password" required autocomplete="current-password" placeholder="Contraseña" class="w-full px-3.5 py-2.5 text-sm input-clean" />
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
+          <input id="login-password" type="password" required class="w-full px-3 py-2 text-sm input-clean" />
         </div>
-        <div class="pt-2">
-          <button type="submit" id="btn-login-submit" class="w-full py-2.5 px-4 rounded-lg btn-primary font-medium text-sm">
-            <span id="login-btn-text">Iniciar Sesión</span>
-            <span id="login-loading" class="hidden">Conectando...</span>
-          </button>
-        </div>
+        <button type="submit" id="btn-login-submit" class="w-full py-2.5 rounded-lg btn-primary font-medium text-sm mt-2">
+          <span id="login-btn-text">Ingresar al Sistema</span>
+          <span id="login-loading" class="hidden">Conectando a Google...</span>
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- 2. APLICACIÓN PRINCIPAL -->
+  <!-- APLICACIÓN PRINCIPAL -->
   <div id="app-screen" class="hidden flex-1 flex flex-col">
-    <!-- Barra Superior -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-      <div class="max-w-[1560px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+    <!-- Navbar -->
+    <header class="bg-white border-b border-blue-100 sticky top-0 z-30 shadow-sm">
+      <div class="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between">
         <div class="flex items-center gap-6">
-          <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center font-semibold text-xs">CR</div>
-            <span class="text-sm font-semibold text-slate-900 tracking-tight">Control de Reclasificación</span>
+          <div class="font-bold text-navy flex items-center gap-2">
+            <span class="bg-navy text-white px-2 py-1 rounded text-xs">CR</span> Intermediarios
           </div>
-          <!-- Pestañas -->
-          <nav class="flex items-center gap-1">
-            <button type="button" data-tab="tab-control" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition flex items-center gap-1.5">
-              Control de Reclasificación
-            </button>
-            <button type="button" data-tab="tab-maestro" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
-              <span>Control de Intermediarios</span>
-              <span id="badge-maestro-count" class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-mono text-[10px] font-semibold">0</span>
-            </button>
-            <button type="button" data-tab="tab-bitacora" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
-              <span>Bitácora</span>
-              <span id="badge-bitacora-count" class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-mono text-[10px] font-semibold">0</span>
-            </button>
+          <nav class="hidden md:flex items-center gap-2">
+            <button data-tab="tab-control" class="nav-tab-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-navy text-white">Histórico</button>
+            <button data-tab="tab-maestro" class="nav-tab-btn px-4 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-blue-50">Maestro</button>
+            <button data-tab="tab-bitacora" class="nav-tab-btn px-4 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-blue-50">Bitácora</button>
           </nav>
         </div>
-        <div class="flex items-center gap-2.5">
-          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-xs text-slate-700">
-            <span id="header-user-name" class="font-medium">Usuario</span>
-            <span class="text-slate-400">·</span>
-            <span id="header-user-role" class="text-[11px] text-slate-500">Rol</span>
+        <div class="flex items-center gap-3">
+          <div class="text-right hidden sm:block">
+            <div id="header-user-name" class="text-xs font-bold text-navy">Usuario</div>
+            <div id="header-user-role" class="text-[10px] text-slate-500 uppercase">Rol</div>
           </div>
-          <button type="button" id="btn-logout" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">Salir</button>
+          <button id="btn-logout" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100">Salir</button>
         </div>
       </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="max-w-[1560px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-4">
+    <main class="max-w-[1600px] w-full mx-auto px-4 py-6 flex-1">
       
-      <!-- PESTAÑA 1: CONTROL DE RECLASIFICACIÓN -->
+      <!-- PESTAÑA HISTÓRICO -->
       <section id="tab-control" class="space-y-4">
-        <div class="surface-card p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div class="flex flex-1 flex-wrap items-center gap-2">
-            <select id="filter-branch" class="px-2.5 py-1.5 text-xs input-clean"><option value="ALL">Sucursal: Todas</option></select>
-            <select id="filter-executive" class="px-2.5 py-1.5 text-xs input-clean"><option value="ALL">Ejecutivo: Todos</option></select>
-            <select id="filter-leader" class="px-2.5 py-1.5 text-xs input-clean"><option value="ALL">Líder: Todos</option></select>
-            <select id="filter-channel" class="px-2.5 py-1.5 text-xs input-clean"><option value="ALL">Canal: Todos</option></select>
-            <select id="filter-validity" class="px-2.5 py-1.5 text-xs input-clean">
-              <option value="ALL">Vigencia: Todas</option>
-              <option value="OPEN">Solo Vigentes</option>
-              <option value="CLOSED">Solo Cerrados</option>
-            </select>
-            <select id="filter-code-status" class="px-2.5 py-1.5 text-xs input-clean">
-              <option value="ALL">Estatus: Todos</option>
-              <option value="ACTIVO">Código Activo</option>
-              <option value="INACTIVO">Código Inactivo</option>
-            </select>
-            <button type="button" id="btn-clear-filters" class="px-2 py-1 text-xs text-slate-500 hover:text-slate-900 transition">Restablecer</button>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button type="button" id="btn-refresh-table" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar</button>
-            <button type="button" id="btn-open-new-modal" class="px-3.5 py-1.5 rounded-lg btn-primary text-xs font-medium">+ Nuevo Registro</button>
+        <div class="surface-card p-4 flex flex-wrap gap-3 items-center justify-between bg-blue-50/30">
+          <h2 class="text-sm font-bold text-navy">Histórico de Reclasificación</h2>
+          <div class="flex gap-2">
+            <button id="btn-refresh-historial" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar</button>
+            <button class="px-3 py-1.5 rounded-lg btn-primary text-xs font-medium opacity-50 cursor-not-allowed">Nuevo Registro (Usa Maestro)</button>
           </div>
         </div>
-
         <div class="surface-card overflow-hidden">
-          <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-            <span class="text-xs font-semibold text-slate-700">Registros Históricos de Reclasificación</span>
-          </div>
-          <div class="overflow-x-auto scroll-clean">
-            <table id="table-dt-historial" class="w-full text-left border-collapse display nowrap" style="width:100%">
-              <thead>
-                <tr>
-                  <th>ID</th><th>Código</th><th>Estatus</th><th>Intermediario Corregido</th>
-                  <th>Tomador</th><th>Asegurado</th><th>Sucursal</th><th>Ejecutivo</th>
-                  <th>Líder</th><th>Canal</th><th>Inicio</th><th>Fin</th><th class="text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="historial-tbody"></tbody>
-            </table>
-          </div>
+          <table id="table-dt-historial" class="w-full text-left display nowrap" style="width:100%">
+            <thead><tr><th>ID</th><th>Código</th><th>Estatus</th><th>Intermediario</th><th>Sucursal</th><th>Ejecutivo</th><th>Inicio</th><th>Fin</th></tr></thead>
+            <tbody id="historial-tbody"></tbody>
+          </table>
         </div>
       </section>
 
-      <!-- PESTAÑA 2: CONTROL DE INTERMEDIARIOS -->
+      <!-- PESTAÑA MAESTRO -->
       <section id="tab-maestro" class="hidden space-y-4">
-        <div class="surface-card p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold text-slate-800">Hoja <code>control_De_intermediarios</code></span>
-            <select id="filter-activo-maestro" class="px-3 py-1.5 text-xs input-clean">
-              <option value="ALL">Estatus: Todos</option>
-              <option value="SI">Solo Activos (SI)</option>
-              <option value="NO">Solo Inactivos (NO)</option>
-            </select>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button type="button" id="btn-refresh-maestro" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar</button>
-            <button type="button" id="btn-nuevo-maestro" class="px-3.5 py-1.5 rounded-lg btn-primary text-xs font-medium">+ Nuevo Intermediario</button>
+        <div class="surface-card p-4 flex flex-wrap gap-3 items-center justify-between bg-blue-50/30">
+          <h2 class="text-sm font-bold text-navy">Control Maestro de Intermediarios</h2>
+          <div class="flex gap-2">
+            <button id="btn-refresh-maestro" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar</button>
+            <button id="btn-nuevo-maestro" class="px-3 py-1.5 rounded-lg btn-success text-xs font-medium shadow-sm">+ Nuevo Intermediario</button>
           </div>
         </div>
-
         <div class="surface-card overflow-hidden">
-          <div class="overflow-x-auto scroll-clean">
-            <table id="table-dt-maestro" class="w-full text-left border-collapse display nowrap" style="width:100%">
-              <thead>
-                <tr>
-                  <th>ID</th><th>INTERMEDIARIO</th><th>COD</th><th>EJECUTIVO</th>
-                  <th>FECHA INICIO</th><th>FECHA FIN</th><th>SUCURSAL</th><th>LIDER</th>
-                  <th>ACTIVO</th><th>CEDULA</th><th>CORREO</th><th>FECHA NAC</th>
-                  <th>FECHA AFILIACION</th><th class="text-right">ACCIONES</th>
-                </tr>
-              </thead>
-              <tbody id="maestro-tbody"></tbody>
-            </table>
-          </div>
+          <table id="table-dt-maestro" class="w-full text-left display nowrap" style="width:100%">
+            <thead><tr><th>ID</th><th>INTERMEDIARIO</th><th>COD</th><th>EJECUTIVO</th><th>SUCURSAL</th><th>INICIO</th><th>FIN</th><th>ACTIVO</th><th>ACCIONES</th></tr></thead>
+            <tbody id="maestro-tbody"></tbody>
+          </table>
         </div>
       </section>
 
-      <!-- PESTAÑA 3: BITÁCORA -->
+      <!-- PESTAÑA BITÁCORA -->
       <section id="tab-bitacora" class="hidden space-y-4">
-        <div class="surface-card p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-700">Bitácora de Movimientos</h2>
-          <button type="button" id="btn-refresh-bitacora" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar Bitácora</button>
+        <div class="surface-card p-4 flex flex-wrap gap-3 items-center justify-between bg-blue-50/30">
+          <h2 class="text-sm font-bold text-navy">Auditoría / Bitácora</h2>
+          <button id="btn-refresh-bitacora" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-medium">↻ Refrescar</button>
         </div>
         <div class="surface-card overflow-hidden">
-          <div class="overflow-x-auto scroll-clean">
-            <table id="table-dt-bitacora" class="w-full text-left border-collapse display nowrap" style="width:100%">
-              <thead>
-                <tr>
-                  <th>ID</th><th>Fecha/Hora</th><th>Usuario</th><th>Operación</th>
-                  <th>Intermediario</th><th>Anterior</th><th>Nuevo</th><th>Detalle</th>
-                </tr>
-              </thead>
-              <tbody id="bitacora-tbody"></tbody>
-            </table>
-          </div>
+          <table id="table-dt-bitacora" class="w-full text-left display nowrap" style="width:100%">
+            <thead><tr><th>ID</th><th>Fecha/Hora</th><th>Usuario</th><th>Operación</th><th>Intermediario</th><th>Detalle</th></tr></thead>
+            <tbody id="bitacora-tbody"></tbody>
+          </table>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- MODAL 1: RECLASIFICACIÓN HISTÓRICA (Original) -->
-  <div id="modal-overlay" class="hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full overflow-hidden modal-enter">
-      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <h3 id="modal-title" class="text-sm font-semibold text-slate-900">Registro de Reclasificación</h3>
-          <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Completa los datos para guardar en el historial</p>
-        </div>
-        <button type="button" id="btn-close-modal" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">Cerrar</button>
+  <!-- MODAL MAESTRO -->
+  <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <h3 class="text-lg font-bold text-navy" id="modal-maestro-title">Gestión de Intermediario</h3>
+        <button id="btn-cerrar-modal-maestro" class="text-slate-400 hover:text-red-500 font-bold text-xl">&times;</button>
       </div>
-
-      <form id="assignment-form" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto scroll-clean">
-        <input type="hidden" id="form-mode" value="NEW_OR_RECLASSIFY" />
-        <input type="hidden" id="form-edit-id" value="" />
-
-        <div id="quick-select-container" class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <label for="form-existing-select" class="block text-xs font-medium text-slate-700 mb-1">Operación</label>
-          <select id="form-existing-select" class="w-full px-3 py-2 text-xs sm:text-sm input-clean">
-            <option value="__NEW__">+ Crear nuevo registro</option>
-          </select>
-        </div>
-
-        <div id="reclassify-closure-box" class="hidden p-3.5 rounded-xl bg-slate-50 border border-slate-300 space-y-2 text-xs">
-          <div class="font-semibold text-slate-900">Cierre de vigencia del registro actual</div>
-          <div id="reclassify-current-summary" class="text-slate-600 leading-relaxed"></div>
-          <div class="pt-1">
-            <label for="form-fecha-cierre-anterior" class="block text-xs font-medium text-slate-700 mb-1">Fecha Fin para cerrar el registro saliente *</label>
-            <input id="form-fecha-cierre-anterior" type="date" class="w-full sm:w-56 px-3 py-1.5 text-xs font-mono input-clean" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label for="form-codigo" class="block text-xs font-medium text-slate-700 mb-1">Código Intermediario *</label>
-            <input id="form-codigo" type="text" required placeholder="Ej. 10450" class="w-full px-3 py-2 text-sm font-mono uppercase input-clean" />
-          </div>
-          <div class="sm:col-span-2">
-            <label for="form-estatus-codigo" class="block text-xs font-medium text-slate-700 mb-1">Estatus del Código *</label>
-            <select id="form-estatus-codigo" class="w-full px-3 py-2 text-sm input-clean">
-              <option value="ACTIVO">ACTIVO</option>
-              <option value="INACTIVO">INACTIVO</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label for="form-nombre" class="block text-xs font-medium text-slate-700 mb-1">Nombre y Apellido del Intermediario (Corregido) *</label>
-          <input id="form-nombre" type="text" required placeholder="Nombre y apellido o razón social" class="w-full px-3 py-2 text-sm input-clean" />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><label for="form-tomador" class="block text-xs font-medium text-slate-700 mb-1">Nombre del Tomador</label><input id="form-tomador" type="text" class="w-full px-3 py-2 text-sm input-clean" /></div>
-          <div><label for="form-asegurado" class="block text-xs font-medium text-slate-700 mb-1">Nombre del Asegurado</label><input id="form-asegurado" type="text" class="w-full px-3 py-2 text-sm input-clean" /></div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><label for="form-sucursal" class="block text-xs font-medium text-slate-700 mb-1">Sucursal *</label><select id="form-sucursal" required class="w-full px-3 py-2 text-sm input-clean"></select></div>
-          <div><label for="form-ejecutivo" class="block text-xs font-medium text-slate-700 mb-1">Ejecutivo *</label><select id="form-ejecutivo" required class="w-full px-3 py-2 text-sm input-clean"></select></div>
-          <div><label for="form-lider" class="block text-xs font-medium text-slate-700 mb-1">Líder</label><select id="form-lider" class="w-full px-3 py-2 text-sm input-clean"></select></div>
-          <div><label for="form-canal" class="block text-xs font-medium text-slate-700 mb-1">Canal</label><select id="form-canal" class="w-full px-3 py-2 text-sm input-clean"></select></div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <div><label for="form-fecha-inicio" class="block text-xs font-medium text-slate-700 mb-1">Fecha de Inicio *</label><input id="form-fecha-inicio" type="date" required class="w-full px-3 py-2 text-sm font-mono input-clean" /></div>
-          <div><label for="form-fecha-fin" class="block text-xs font-medium text-slate-700 mb-1">Fecha Fin</label><input id="form-fecha-fin" type="date" class="w-full px-3 py-2 text-sm font-mono input-clean" /></div>
-        </div>
-
-        <div id="form-error-msg" class="hidden p-3 rounded-lg bg-slate-100 border border-slate-300 text-xs text-slate-800 font-medium"></div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-          <button type="button" id="btn-cancel-modal" class="px-4 py-2 rounded-lg btn-secondary text-xs font-medium">Cancelar</button>
-          <button type="submit" id="btn-save-modal" class="px-5 py-2 rounded-lg btn-primary text-xs font-medium">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 2: NUEVO/EDITAR INTERMEDIARIO (Maestro) -->
-  <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 modal-enter max-h-[90vh] overflow-y-auto scroll-clean">
-      <h3 class="text-lg font-semibold text-slate-900 mb-4" id="modal-maestro-title">Intermediario (Control)</h3>
       
       <form id="maestro-form" class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div class="sm:col-span-1">
-            <label class="block text-xs font-medium text-slate-700">ID (Auto)</label>
-            <input id="form-m-id" type="text" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-500 font-mono" />
-          </div>
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-slate-700">Código *</label>
-            <input id="form-m-cod" type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm uppercase" />
-          </div>
-          <div class="sm:col-span-1">
-            <label class="block text-xs font-medium text-slate-700">Activo</label>
-            <select id="form-m-activo" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
-              <option value="SI">SI</option>
-              <option value="NO">NO</option>
-            </select>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="sm:col-span-1"><label class="block text-xs font-bold text-slate-700">ID (Auto)</label><input id="form-m-id" type="text" readonly class="w-full px-3 py-2 bg-slate-100 rounded-lg text-sm text-slate-500 border border-slate-200" /></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-bold text-slate-700">Código *</label><input id="form-m-cod" type="text" required class="w-full px-3 py-2 input-clean uppercase text-sm" /></div>
+          <div class="sm:col-span-1"><label class="block text-xs font-bold text-slate-700">Activo</label><select id="form-m-activo" class="w-full px-3 py-2 input-clean text-sm"><option value="SI">SI</option><option value="NO">NO</option></select></div>
         </div>
 
-        <div>
-          <label class="block text-xs font-medium text-slate-700">Nombre del Intermediario *</label>
-          <input id="form-m-intermediario" type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+        <div><label class="block text-xs font-bold text-slate-700">Nombre del Intermediario *</label><input id="form-m-intermediario" type="text" required class="w-full px-3 py-2 input-clean text-sm" /></div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div><label class="block text-xs font-bold text-slate-700">Ejecutivo *</label><select id="form-m-ejecutivo" required class="w-full px-3 py-2 input-clean text-sm"></select></div>
+          <div><label class="block text-xs font-bold text-slate-700">Sucursal *</label><select id="form-m-sucursal" required class="w-full px-3 py-2 input-clean text-sm"></select></div>
+          <div><label class="block text-xs font-bold text-slate-700">Líder</label><select id="form-m-lider" class="w-full px-3 py-2 input-clean text-sm"></select></div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-blue-50 pt-4">
           <div>
-            <label class="block text-xs font-medium text-slate-700">Ejecutivo *</label>
-            <select id="form-m-ejecutivo" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700">Sucursal *</label>
-            <select id="form-m-sucursal" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700">Líder</label>
-            <select id="form-m-lider" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"></select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-200 pt-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-700">Cédula / RIF</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Cédula / RIF</label>
             <div class="flex gap-2">
-              <select id="form-m-cedula-tipo" class="w-20 px-2 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50">
-                <option value="V-">V-</option>
-                <option value="E-">E-</option>
-                <option value="J-">J-</option>
-                <option value="G-">G-</option>
-              </select>
-              <input id="form-m-cedula-num" type="text" placeholder="12345678" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono" />
+              <select id="form-m-cedula-tipo" class="w-20 px-2 py-2 input-clean text-sm"><option value="V-">V-</option><option value="E-">E-</option><option value="J-">J-</option><option value="G-">G-</option></select>
+              <input id="form-m-cedula-num" type="text" class="flex-1 px-3 py-2 input-clean text-sm" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-700">Correo Electrónico</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
             <div class="flex gap-2">
-              <input id="form-m-correo-user" type="text" placeholder="usuario" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
-              <select id="form-m-correo-domain" class="w-36 px-2 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50" onchange="toggleCorreoCustom()">
-                <option value="@gmail.com">@gmail.com</option>
-                <option value="@hotmail.com">@hotmail.com</option>
-                <option value="@outlook.com">@outlook.com</option>
-                <option value="@yahoo.com">@yahoo.com</option>
-                <option value="custom">Personalizado...</option>
+              <input id="form-m-correo-user" type="text" class="flex-1 px-3 py-2 input-clean text-sm" />
+              <select id="form-m-correo-domain" class="w-36 px-2 py-2 input-clean text-sm" onchange="document.getElementById('form-m-correo-custom').classList.toggle('hidden', this.value !== 'custom')">
+                <option value="@gmail.com">@gmail.com</option><option value="@hotmail.com">@hotmail.com</option><option value="custom">Personalizado...</option>
               </select>
             </div>
-            <input id="form-m-correo-custom" type="text" placeholder="@empresa.com" class="hidden w-full mt-2 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+            <input id="form-m-correo-custom" type="text" placeholder="@empresa.com" class="hidden w-full mt-2 px-3 py-2 input-clean text-sm" />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-4">
-          <div><label class="block text-xs font-medium text-slate-700">Fecha Nacimiento</label><input id="form-m-fechanac" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" /></div>
-          <div><label class="block text-xs font-medium text-slate-700">Fecha Afiliación</label><input id="form-m-fechaafiliacion" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" /></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-blue-50 pt-4 bg-blue-50/30 p-3 rounded-lg">
+          <div><label class="block text-xs font-bold text-navy">Fecha Inicio *</label><input id="form-m-fechainicio" type="date" required class="w-full px-3 py-2 input-clean text-sm" /></div>
+          <div><label class="block text-xs font-bold text-red-700">Fecha Fin (Libera al ejecutivo)</label><input id="form-m-fechafin" type="date" class="w-full px-3 py-2 border border-red-200 bg-red-50 text-red-900 rounded-lg text-sm" /></div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-700">Fecha Inicio *</label>
-            <input id="form-m-fechainicio" type="date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700">Fecha Fin (Libera al ejecutivo)</label>
-            <input id="form-m-fechafin" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-orange-50 text-orange-900 border-orange-200 font-mono" />
-          </div>
-        </div>
-        
-        <div id="form-m-error" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200"></div>
+        <div id="form-m-error" class="hidden text-xs text-red-700 bg-red-50 p-3 rounded-lg border border-red-200 font-medium"></div>
 
-        <div class="flex justify-end gap-2 pt-4">
-          <button type="button" id="btn-cerrar-modal-maestro" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium">Cancelar</button>
-          <button type="submit" id="btn-save-maestro" class="px-5 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium">
-            <span id="save-maestro-text">Guardar en Sistema</span>
-            <span id="save-maestro-loading" class="hidden">Guardando...</span>
-          </button>
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" id="btn-cancelar-modal" class="px-5 py-2 rounded-lg btn-secondary text-sm font-bold">Cancelar</button>
+          <button type="submit" class="px-6 py-2 rounded-lg btn-primary text-sm font-bold shadow-md"><span id="save-maestro-text">Guardar Cambios</span><span id="save-maestro-loading" class="hidden">Procesando...</span></button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // CONFIGURACIÓN DE LA API CON TU URL REAL
-    // =========================================================================
+    // =========================================================
+    // API URL de tu Google Apps Script
+    // =========================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG/exec";
 
-    // Estado global
-    const state = {
-      currentUser: null,
-      historial: [], maestro: [], bitacora: [],
-      sucursales: [], ejecutivos: [], lideres: [], canales: []
-    };
+    const state = { currentUser: null, historial: [], maestro: [], bitacora: [], sucursales: [], ejecutivos: [], lideres: [], canales: [] };
+    let dtHistorial = null, dtMaestro = null, dtBitacora = null;
 
-    let dtHistorial = null;
-    let dtMaestro = null;
-    let dtBitacora = null;
-
-    // --- Funciones Utilitarias ---
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'px-4 py-3 rounded-xl shadow-lg bg-slate-900 text-white text-xs font-medium flex items-center justify-between gap-3 toast-enter pointer-events-auto';
-      toast.innerHTML = `<span>${message}</span><button type="button" class="text-slate-400 hover:text-white text-xs" onclick="this.parentElement.remove()">✕</button>`;
-      container.appendChild(toast);
-      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+    function showToast(message, isError = false) {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `px-4 py-3 rounded-xl shadow-lg text-white text-xs font-medium flex justify-between gap-3 toast-enter pointer-events-auto ${isError ? 'bg-red-600' : 'bg-navy'}`;
+      t.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()">✕</button>`;
+      c.appendChild(t);
+      setTimeout(() => { if (t.parentNode) t.remove(); }, 4000);
     }
 
+    // EL FIX DEL CORS ESTÁ AQUÍ: NO enviamos headers complejos, mandamos el body directo.
     async function apiCall(action, payload = {}) {
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
-          mode: 'cors',
+          // Omitimos 'Content-Type': 'application/json' intencionalmente para evitar el preflight de CORS
           body: JSON.stringify({ action, payload })
         });
-        if (!response.ok) throw new Error('Error de red al conectar con Google Sheets');
         return await response.json();
       } catch (error) {
-        throw new Error("No se pudo conectar con el servidor. Verifica el despliegue del script.");
+        throw new Error("Fallo de conexión. Revisa el despliegue del Apps Script.");
       }
     }
 
-    function toggleCorreoCustom() {
-      const select = document.getElementById('form-m-correo-domain');
-      const customInput = document.getElementById('form-m-correo-custom');
-      if (select.value === 'custom') {
-        customInput.classList.remove('hidden');
-        customInput.focus();
-      } else {
-        customInput.classList.add('hidden');
-      }
-    }
-
-    function poblarSelect(id, opciones) {
-      const select = document.getElementById(id);
-      if(!select) return;
-      select.innerHTML = '<option value="">Seleccione...</option>';
-      opciones.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt;
-        option.textContent = opt;
-        select.appendChild(option);
-      });
-    }
-
-    // --- Carga de Datos ---
     async function refrescarTodo(mostrarAviso = false) {
-      if (mostrarAviso) showToast('Sincronizando con la base de datos...');
+      if(mostrarAviso) showToast('Sincronizando...');
       try {
          const res = await apiCall('obtenerDatosSistema');
          if (res.exito) {
-           state.historial = res.historial || [];
-           state.maestro = res.maestro || [];
-           state.bitacora = res.bitacora || [];
-           state.sucursales = res.sucursales || [];
-           state.ejecutivos = res.ejecutivos || [];
-           state.lideres = res.lideres || [];
-           state.canales = res.canales || [];
+           Object.assign(state, res);
            
-           poblarSelect('form-m-sucursal', state.sucursales);
-           poblarSelect('form-m-ejecutivo', state.ejecutivos);
-           poblarSelect('form-m-lider', state.lideres);
+           const poblar = (id, arr) => {
+             const sel = document.getElementById(id);
+             if(sel) { sel.innerHTML = '<option value="">Seleccione...</option>'; arr.forEach(x => sel.appendChild(new Option(x, x))); }
+           };
+           poblar('form-m-sucursal', state.sucursales);
+           poblar('form-m-ejecutivo', state.ejecutivos);
+           poblar('form-m-lider', state.lideres);
            
-           poblarSelect('form-sucursal', state.sucursales);
-           poblarSelect('form-ejecutivo', state.ejecutivos);
-           poblarSelect('form-lider', state.lideres);
-           poblarSelect('form-canal', state.canales);
-           
-           renderTablaMaestro();
-           renderTablaHistorial();
-           renderTablaBitacora();
-           
-           if (mostrarAviso) showToast('Datos actualizados correctamente.');
-         } else {
-           throw new Error(res.mensaje || "Error al obtener datos");
-         }
-      } catch (e) {
-        showToast(e.message);
-      }
+           renderTablaMaestro(); renderTablaHistorial(); renderTablaBitacora();
+           if(mostrarAviso) showToast('Datos cargados', false);
+         } else { throw new Error(res.mensaje); }
+      } catch (e) { showToast(e.message, true); }
     }
 
-    // --- Renderizado de Tablas ---
     function renderTablaMaestro() {
-      if (dtMaestro) { dtMaestro.destroy(); }
-      const tbody = document.getElementById('maestro-tbody');
-      tbody.innerHTML = '';
-      document.getElementById('badge-maestro-count').textContent = state.maestro.length;
-
+      if (dtMaestro) dtMaestro.destroy();
+      const tb = document.getElementById('maestro-tbody'); tb.innerHTML = '';
       state.maestro.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="font-mono text-slate-500">${r.id || '-'}</td>
-          <td class="font-medium text-slate-900">${r.intermediario || '-'}</td>
-          <td class="font-mono font-semibold">${r.cod || '-'}</td>
-          <td>${r.ejecutivo || '-'}</td>
-          <td class="font-mono text-[11px]">${r.fechaInicio || '-'}</td>
-          <td class="font-mono text-[11px]">${r.fechaFin || '-'}</td>
-          <td>${r.sucursal || '-'}</td>
-          <td>${r.lider || '-'}</td>
-          <td><span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${r.activo==='SI'?'bg-emerald-50 text-emerald-800 border-emerald-200':'bg-slate-100 text-slate-500 border-slate-200'}">${r.activo||'SI'}</span></td>
-          <td class="font-mono text-slate-600">${r.cedula || '-'}</td>
-          <td class="text-slate-600">${r.correo || '-'}</td>
-          <td class="font-mono text-[11px]">${r.fechaNac || '-'}</td>
-          <td class="font-mono text-[11px]">${r.fechaAfiliacion || '-'}</td>
-          <td class="text-right">
-            <button type="button" class="px-2.5 py-1 rounded-md btn-secondary text-xs font-medium btn-edit-maestro" data-cod="${r.cod}">Editar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+        tb.innerHTML += `<tr>
+          <td class="text-slate-500">${r.id}</td><td class="font-bold text-navy">${r.intermediario}</td>
+          <td class="font-mono">${r.cod}</td><td>${r.ejecutivo}</td><td>${r.sucursal}</td>
+          <td class="text-[11px]">${r.fechaInicio}</td><td class="text-[11px] text-red-600 font-bold">${r.fechaFin}</td>
+          <td><span class="px-2 py-1 rounded text-[10px] font-bold ${r.activo==='SI'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${r.activo}</span></td>
+          <td><button class="btn-secondary px-3 py-1 rounded text-xs font-bold btn-edit-maestro" data-cod="${r.cod}">Editar</button></td>
+        </tr>`;
       });
-      dtMaestro = $('#table-dt-maestro').DataTable({ pageLength: 25, scrollX: true, language: { search: "Buscar:" } });
+      dtMaestro = $('#table-dt-maestro').DataTable({ scrollX: true, language: { search: "Buscar:" } });
     }
 
     function renderTablaHistorial() {
-      if (dtHistorial) { dtHistorial.destroy(); }
-      const tbody = document.getElementById('historial-tbody');
-      tbody.innerHTML = '';
+      if (dtHistorial) dtHistorial.destroy();
+      const tb = document.getElementById('historial-tbody'); tb.innerHTML = '';
       state.historial.forEach(r => {
-        const tr = document.createElement('tr');
-        const isVig = !r.fechaFin;
-        tr.innerHTML = `
-          <td class="font-mono text-slate-500">${r.idUnico || '-'}</td>
-          <td class="font-mono font-semibold">${r.codigo || '-'}</td>
-          <td><span class="px-2 py-0.5 rounded-md text-[11px] font-medium border ${r.estatus==='ACTIVO'?'bg-slate-100 text-slate-800':'bg-slate-100 text-slate-400'}">${r.estatus||'ACTIVO'}</span></td>
-          <td class="font-medium text-slate-900">${r.nombreIntermediario || '-'}</td>
-          <td>${r.nombreTomador || '-'}</td>
-          <td>${r.nombreAsegurado || '-'}</td>
-          <td>${r.sucursal || '-'}</td>
-          <td class="font-medium text-slate-800">${r.ejecutivo || '-'}</td>
-          <td>${r.lider || '-'}</td>
-          <td>${r.canal || '-'}</td>
-          <td class="font-mono text-[11px]">${r.fechaInicio || '-'}</td>
-          <td class="font-mono text-[11px]">${isVig ? '<span class="text-sky-800 font-medium">Vigente</span>' : r.fechaFin}</td>
-          <td class="text-right"><button type="button" class="btn-secondary px-2.5 py-1 rounded-md text-xs" onclick="showToast('Ver historial no implementado aún')">Detalle</button></td>
-        `;
-        tbody.appendChild(tr);
+        tb.innerHTML += `<tr><td>${r.idUnico}</td><td class="font-mono">${r.codigo}</td><td>${r.estatus}</td><td>${r.nombreIntermediario}</td><td>${r.sucursal}</td><td>${r.ejecutivo}</td><td>${r.fechaInicio}</td><td>${r.fechaFin}</td></tr>`;
       });
-      dtHistorial = $('#table-dt-historial').DataTable({ pageLength: 25, scrollX: true, language: { search: "Buscar:" } });
+      dtHistorial = $('#table-dt-historial').DataTable({ scrollX: true });
     }
 
     function renderTablaBitacora() {
-      if (dtBitacora) { dtBitacora.destroy(); }
-      const tbody = document.getElementById('bitacora-tbody');
-      tbody.innerHTML = '';
-      document.getElementById('badge-bitacora-count').textContent = state.bitacora.length;
+      if (dtBitacora) dtBitacora.destroy();
+      const tb = document.getElementById('bitacora-tbody'); tb.innerHTML = '';
       state.bitacora.forEach(b => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="font-mono text-slate-500">${b.idMovimiento || '-'}</td>
-          <td class="font-mono"><div class="font-medium text-slate-900">${b.fecha||'-'}</div><div class="text-slate-400 text-[11px]">${b.hora||'-'}</div></td>
-          <td class="font-medium text-slate-900">${b.usuario || '-'}</td>
-          <td class="text-slate-800">${b.tipoOperacion || '-'}</td>
-          <td><div class="font-mono font-semibold">${b.codigoIntermediario||'-'}</div><div class="text-slate-500">${b.nombreIntermediario||'-'}</div></td>
-          <td class="text-slate-500">${b.datoAnterior || '-'}</td>
-          <td class="font-medium text-slate-900">${b.datoNuevo || '-'}</td>
-          <td class="text-slate-600">${b.detalle || '-'}</td>
-        `;
-        tbody.appendChild(tr);
+        tb.innerHTML += `<tr><td>${b.idMovimiento}</td><td>${b.fecha} ${b.hora}</td><td class="font-bold text-navy">${b.usuario}</td><td>${b.tipoOperacion}</td><td>${b.codigoIntermediario}</td><td>${b.detalle}</td></tr>`;
       });
-      dtBitacora = $('#table-dt-bitacora').DataTable({ pageLength: 25, order: [[0, 'desc']], scrollX: true, language: { search: "Buscar:" } });
+      dtBitacora = $('#table-dt-bitacora').DataTable({ scrollX: true, order: [[0, 'desc']] });
     }
 
-    // --- Eventos y Formularios ---
     document.addEventListener('DOMContentLoaded', () => {
       
-      // Login
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
+      // Login Segurizado
+      document.getElementById('login-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btnText = document.getElementById('login-btn-text');
-        const btnLoad = document.getElementById('login-loading');
-        const errBox = document.getElementById('login-error-box');
-        
-        errBox.classList.add('hidden');
-        btnText.classList.add('hidden'); 
-        btnLoad.classList.remove('hidden');
+        const errBox = document.getElementById('login-error-box'); errBox.classList.add('hidden');
+        document.getElementById('login-btn-text').classList.add('hidden');
+        document.getElementById('login-loading').classList.remove('hidden');
         
         try {
-          const res = await apiCall('autenticarUsuario', {
-            username: document.getElementById('login-username').value,
-            password: document.getElementById('login-password').value
+          const res = await apiCall('autenticarUsuario', { 
+            username: document.getElementById('login-username').value, 
+            password: document.getElementById('login-password').value 
           });
-
           if (res.exito) {
             state.currentUser = res.usuario;
             document.getElementById('header-user-name').textContent = res.usuario.nombre;
@@ -665,129 +315,59 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             refrescarTodo(true);
-          } else {
-            errBox.textContent = res.mensaje || 'Credenciales incorrectas.';
-            errBox.classList.remove('hidden');
-          }
-        } catch (error) {
-          errBox.textContent = error.message;
-          errBox.classList.remove('hidden');
-        } finally {
-          btnText.classList.remove('hidden'); 
-          btnLoad.classList.add('hidden');
-        }
+          } else { errBox.textContent = res.mensaje; errBox.classList.remove('hidden'); }
+        } catch (error) { errBox.textContent = error.message; errBox.classList.remove('hidden'); }
+        document.getElementById('login-btn-text').classList.remove('hidden');
+        document.getElementById('login-loading').classList.add('hidden');
       });
 
-      document.getElementById('btn-logout').addEventListener('click', () => {
-        state.currentUser = null;
-        document.getElementById('app-screen').classList.add('hidden');
-        document.getElementById('login-screen').classList.remove('hidden');
-      });
+      document.getElementById('btn-logout')?.addEventListener('click', () => location.reload());
 
-      // Tabs
+      // Navegación (Tabs)
       document.querySelectorAll('.nav-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.getAttribute('data-tab');
           document.querySelectorAll('.nav-tab-btn').forEach(b => {
-             b.className = b.getAttribute('data-tab') === target 
-               ? 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition flex items-center gap-1.5'
-               : 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5';
+            b.className = b.getAttribute('data-tab') === target 
+              ? 'nav-tab-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-navy text-white' 
+              : 'nav-tab-btn px-4 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-blue-50';
           });
-          ['tab-control', 'tab-maestro', 'tab-bitacora'].forEach(sec => {
-            document.getElementById(sec).classList.toggle('hidden', sec !== target);
-          });
-          if(dtMaestro) dtMaestro.columns.adjust();
-          if(dtHistorial) dtHistorial.columns.adjust();
-          if(dtBitacora) dtBitacora.columns.adjust();
+          ['tab-control', 'tab-maestro', 'tab-bitacora'].forEach(id => document.getElementById(id).classList.toggle('hidden', id !== target));
+          if(dtMaestro) dtMaestro.columns.adjust(); if(dtHistorial) dtHistorial.columns.adjust(); if(dtBitacora) dtBitacora.columns.adjust();
         });
       });
 
-      // Modales Maestro
-      document.getElementById('btn-nuevo-maestro').addEventListener('click', () => {
+      // Modales con protección Null
+      document.getElementById('btn-nuevo-maestro')?.addEventListener('click', () => {
         document.getElementById('maestro-form').reset();
-        document.getElementById('form-m-error').classList.add('hidden');
-        document.getElementById('form-m-correo-custom').classList.add('hidden');
         document.getElementById('modal-maestro-overlay').classList.remove('hidden');
-        document.getElementById('modal-maestro-title').textContent = 'Nuevo Intermediario';
       });
+      
+      const cerrarModal = () => document.getElementById('modal-maestro-overlay').classList.add('hidden');
+      document.getElementById('btn-cerrar-modal-maestro')?.addEventListener('click', cerrarModal);
+      document.getElementById('btn-cancelar-modal')?.addEventListener('click', cerrarModal);
 
-      $('#table-dt-maestro tbody').on('click', '.btn-edit-maestro', function() {
-        const cod = $(this).attr('data-cod');
-        const reg = state.maestro.find(x => x.cod === cod);
+      // Editar
+      $('#table-dt-maestro').on('click', '.btn-edit-maestro', function() {
+        const reg = state.maestro.find(x => x.cod === $(this).data('cod'));
         if (reg) {
           document.getElementById('maestro-form').reset();
-          document.getElementById('modal-maestro-title').textContent = `Editar Intermediario (${reg.cod})`;
-          
-          document.getElementById('form-m-id').value = reg.id || '';
-          document.getElementById('form-m-cod').value = reg.cod || '';
-          document.getElementById('form-m-activo').value = (reg.activo || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
-          document.getElementById('form-m-intermediario').value = reg.intermediario || '';
-          document.getElementById('form-m-ejecutivo').value = reg.ejecutivo || '';
-          document.getElementById('form-m-sucursal').value = reg.sucursal || '';
-          document.getElementById('form-m-lider').value = reg.lider || '';
-          document.getElementById('form-m-fechainicio').value = reg.fechaInicio || '';
-          document.getElementById('form-m-fechafin').value = reg.fechaFin || '';
-          document.getElementById('form-m-fechanac').value = reg.fechaNac || '';
-          document.getElementById('form-m-fechaafiliacion').value = reg.fechaAfiliacion || '';
-
-          if (reg.cedula) {
-            const match = reg.cedula.match(/^(V-|E-|J-|G-)(.*)$/i);
-            if (match) {
-              document.getElementById('form-m-cedula-tipo').value = match[1].toUpperCase();
-              document.getElementById('form-m-cedula-num').value = match[2];
-            } else {
-              document.getElementById('form-m-cedula-num').value = reg.cedula;
-            }
-          }
-
-          if (reg.correo) {
-            const parts = reg.correo.split('@');
-            if (parts.length === 2) {
-              document.getElementById('form-m-correo-user').value = parts[0];
-              const domain = '@' + parts[1];
-              const domainSelect = document.getElementById('form-m-correo-domain');
-              if (Array.from(domainSelect.options).some(opt => opt.value === domain)) {
-                domainSelect.value = domain;
-              } else {
-                domainSelect.value = 'custom';
-                document.getElementById('form-m-correo-custom').value = domain;
-              }
-              toggleCorreoCustom();
-            } else {
-              document.getElementById('form-m-correo-user').value = reg.correo;
-            }
-          }
-
-          document.getElementById('form-m-error').classList.add('hidden');
+          document.getElementById('form-m-id').value = reg.id;
+          document.getElementById('form-m-cod').value = reg.cod;
+          document.getElementById('form-m-intermediario').value = reg.intermediario;
+          document.getElementById('form-m-ejecutivo').value = reg.ejecutivo;
+          document.getElementById('form-m-sucursal').value = reg.sucursal;
+          document.getElementById('form-m-fechainicio').value = reg.fechaInicio;
+          document.getElementById('form-m-fechafin').value = reg.fechaFin;
           document.getElementById('modal-maestro-overlay').classList.remove('hidden');
         }
       });
 
-      document.getElementById('btn-cerrar-modal-maestro').addEventListener('click', () => {
-        document.getElementById('modal-maestro-overlay').classList.add('hidden');
-      });
-      document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-      });
-      document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-      });
-
-      // Guardar Maestro
-      document.getElementById('maestro-form').addEventListener('submit', async (e) => {
+      // Guardar
+      document.getElementById('maestro-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const errBox = document.getElementById('form-m-error');
-        errBox.classList.add('hidden');
-
-        const btnText = document.getElementById('save-maestro-text');
-        const btnLoad = document.getElementById('save-maestro-loading');
-        btnText.classList.add('hidden'); btnLoad.classList.remove('hidden');
-
-        const cedTipo = document.getElementById('form-m-cedula-tipo').value;
-        const cedNum = document.getElementById('form-m-cedula-num').value.trim();
-        const correoUser = document.getElementById('form-m-correo-user').value.trim();
-        const correoDomain = document.getElementById('form-m-correo-domain').value;
-
+        const errBox = document.getElementById('form-m-error'); errBox.classList.add('hidden');
+        
         const payload = {
           id: document.getElementById('form-m-id').value,
           cod: document.getElementById('form-m-cod').value,
@@ -795,37 +375,23 @@
           ejecutivo: document.getElementById('form-m-ejecutivo').value,
           sucursal: document.getElementById('form-m-sucursal').value,
           lider: document.getElementById('form-m-lider').value,
-          cedula: cedNum ? (cedTipo + cedNum) : "",
-          correo: correoUser ? (correoUser + (correoDomain === 'custom' ? document.getElementById('form-m-correo-custom').value.trim() : correoDomain)) : "",
           fechaInicio: document.getElementById('form-m-fechainicio').value,
           fechaFin: document.getElementById('form-m-fechafin').value,
-          fechaNac: document.getElementById('form-m-fechanac').value,
-          fechaAfiliacion: document.getElementById('form-m-fechaafiliacion').value,
-          activo: document.getElementById('form-m-activo').value
+          activo: document.getElementById('form-m-activo').value,
+          usuario: state.currentUser?.username || 'Sistema'
         };
 
         try {
-          const respuesta = await apiCall('guardarIntermediarioMaestro', payload);
-          if (respuesta.exito) {
-            showToast("Intermediario guardado exitosamente");
-            document.getElementById('modal-maestro-overlay').classList.add('hidden');
-            refrescarTodo(); 
-          } else {
-            errBox.textContent = respuesta.mensaje; 
-            errBox.classList.remove('hidden');
-          }
-        } catch(err) {
-          errBox.textContent = err.message;
-          errBox.classList.remove('hidden');
-        } finally {
-          btnText.classList.remove('hidden'); btnLoad.classList.add('hidden');
-        }
+          const res = await apiCall('guardarIntermediarioMaestro', payload);
+          if (res.exito) { showToast("Guardado con éxito"); cerrarModal(); refrescarTodo(); } 
+          else { errBox.textContent = res.mensaje; errBox.classList.remove('hidden'); }
+        } catch(err) { errBox.textContent = err.message; errBox.classList.remove('hidden'); }
       });
-      
-      // Refrescos manuales
-      document.getElementById('btn-refresh-table').addEventListener('click', () => refrescarTodo(true));
-      document.getElementById('btn-refresh-maestro').addEventListener('click', () => refrescarTodo(true));
-      document.getElementById('btn-refresh-bitacora').addEventListener('click', () => refrescarTodo(true));
+
+      // Botones Refrescar
+      document.getElementById('btn-refresh-maestro')?.addEventListener('click', () => refrescarTodo(true));
+      document.getElementById('btn-refresh-historial')?.addEventListener('click', () => refrescarTodo(true));
+      document.getElementById('btn-refresh-bitacora')?.addEventListener('click', () => refrescarTodo(true));
     });
   </script>
 </body>
