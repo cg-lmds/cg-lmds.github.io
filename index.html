@@ -62,12 +62,8 @@
       border-color: #0f172a;
       box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
     }
-    .modal-enter {
-      animation: modalFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .toast-enter {
-      animation: toastFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    .modal-enter { animation: modalFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .toast-enter { animation: toastFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes modalFade {
       from { opacity: 0; transform: scale(0.97) translateY(6px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
@@ -76,17 +72,9 @@
       from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .scroll-clean::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .scroll-clean::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .scroll-clean::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
+    .scroll-clean::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scroll-clean::-webkit-scrollbar-track { background: transparent; }
+    .scroll-clean::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
 
     /* Estilos DataTables */
     .dataTables_wrapper { padding: 0.75rem 1rem 1rem 1rem; font-size: 0.75rem; color: #334155; }
@@ -105,10 +93,8 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Notificaciones Toast -->
+  <!-- Notificaciones Toast y Confirmación -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
-
-  <!-- Diálogo de Confirmación -->
   <div id="swal-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-sm w-full p-6 text-center space-y-4 modal-enter">
       <h3 id="swal-title" class="text-base font-semibold text-slate-900">Confirmación</h3>
@@ -128,15 +114,12 @@
         <h1 class="text-lg font-semibold text-slate-900 tracking-tight">Control de Reclasificación</h1>
         <p class="text-xs text-slate-500 mt-1">Ingresa con tus credenciales para continuar</p>
       </div>
-
       <form id="login-form" class="space-y-4" novalidate>
         <div id="login-error-box" class="hidden p-3 rounded-lg bg-slate-100 border border-slate-300 text-xs text-slate-800 font-medium"></div>
-
         <div>
           <label for="login-username" class="block text-xs font-medium text-slate-700 mb-1.5">Usuario</label>
           <input id="login-username" type="text" required autocomplete="username" placeholder="Usuario" class="w-full px-3.5 py-2.5 text-sm input-clean" />
         </div>
-
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label for="login-password" class="block text-xs font-medium text-slate-700">Contraseña</label>
@@ -144,7 +127,6 @@
           </div>
           <input id="login-password" type="password" required autocomplete="current-password" placeholder="Contraseña" class="w-full px-3.5 py-2.5 text-sm input-clean" />
         </div>
-
         <div class="pt-2">
           <button type="submit" id="btn-login-submit" class="w-full py-2.5 px-4 rounded-lg btn-primary font-medium text-sm">
             <span id="login-btn-text">Iniciar Sesión</span>
@@ -165,7 +147,6 @@
             <div class="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center font-semibold text-xs">CR</div>
             <span class="text-sm font-semibold text-slate-900 tracking-tight">Control de Reclasificación</span>
           </div>
-
           <!-- Pestañas -->
           <nav class="flex items-center gap-1">
             <button type="button" data-tab="tab-control" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition flex items-center gap-1.5">
@@ -181,7 +162,6 @@
             </button>
           </nav>
         </div>
-
         <div class="flex items-center gap-2.5">
           <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-xs text-slate-700">
             <span id="header-user-name" class="font-medium">Usuario</span>
@@ -195,7 +175,7 @@
 
     <!-- Contenido Principal -->
     <main class="max-w-[1560px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-4">
-
+      
       <!-- PESTAÑA 1: CONTROL DE RECLASIFICACIÓN -->
       <section id="tab-control" class="space-y-4">
         <div class="surface-card p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -295,24 +275,90 @@
           </div>
         </div>
       </section>
-
     </main>
   </div>
 
-  <!-- MODAL: RECLASIFICACIÓN HISTÓRICA (Mantenido intacto) -->
+  <!-- MODAL 1: RECLASIFICACIÓN HISTÓRICA (Original) -->
   <div id="modal-overlay" class="hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-    <!-- Aquí va el modal original de reclasificación, simplificado por espacio, asumiendo que lo mantienes -->
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full p-6 text-center">
-        <h3 class="text-sm font-semibold text-slate-900 mb-4">Registro de Reclasificación (Historial)</h3>
-        <p class="text-xs text-slate-500 mb-4">La lógica de este modal se mantiene igual y se conectaría a la nueva API.</p>
-        <button id="btn-close-modal" class="btn-secondary px-4 py-2 rounded">Cerrar</button>
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xl w-full overflow-hidden modal-enter">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 id="modal-title" class="text-sm font-semibold text-slate-900">Registro de Reclasificación</h3>
+          <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Completa los datos para guardar en el historial</p>
+        </div>
+        <button type="button" id="btn-close-modal" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">Cerrar</button>
+      </div>
+
+      <form id="assignment-form" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto scroll-clean">
+        <input type="hidden" id="form-mode" value="NEW_OR_RECLASSIFY" />
+        <input type="hidden" id="form-edit-id" value="" />
+
+        <div id="quick-select-container" class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <label for="form-existing-select" class="block text-xs font-medium text-slate-700 mb-1">Operación</label>
+          <select id="form-existing-select" class="w-full px-3 py-2 text-xs sm:text-sm input-clean">
+            <option value="__NEW__">+ Crear nuevo registro</option>
+          </select>
+        </div>
+
+        <div id="reclassify-closure-box" class="hidden p-3.5 rounded-xl bg-slate-50 border border-slate-300 space-y-2 text-xs">
+          <div class="font-semibold text-slate-900">Cierre de vigencia del registro actual</div>
+          <div id="reclassify-current-summary" class="text-slate-600 leading-relaxed"></div>
+          <div class="pt-1">
+            <label for="form-fecha-cierre-anterior" class="block text-xs font-medium text-slate-700 mb-1">Fecha Fin para cerrar el registro saliente *</label>
+            <input id="form-fecha-cierre-anterior" type="date" class="w-full sm:w-56 px-3 py-1.5 text-xs font-mono input-clean" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="form-codigo" class="block text-xs font-medium text-slate-700 mb-1">Código Intermediario *</label>
+            <input id="form-codigo" type="text" required placeholder="Ej. 10450" class="w-full px-3 py-2 text-sm font-mono uppercase input-clean" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="form-estatus-codigo" class="block text-xs font-medium text-slate-700 mb-1">Estatus del Código *</label>
+            <select id="form-estatus-codigo" class="w-full px-3 py-2 text-sm input-clean">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="form-nombre" class="block text-xs font-medium text-slate-700 mb-1">Nombre y Apellido del Intermediario (Corregido) *</label>
+          <input id="form-nombre" type="text" required placeholder="Nombre y apellido o razón social" class="w-full px-3 py-2 text-sm input-clean" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label for="form-tomador" class="block text-xs font-medium text-slate-700 mb-1">Nombre del Tomador</label><input id="form-tomador" type="text" class="w-full px-3 py-2 text-sm input-clean" /></div>
+          <div><label for="form-asegurado" class="block text-xs font-medium text-slate-700 mb-1">Nombre del Asegurado</label><input id="form-asegurado" type="text" class="w-full px-3 py-2 text-sm input-clean" /></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label for="form-sucursal" class="block text-xs font-medium text-slate-700 mb-1">Sucursal *</label><select id="form-sucursal" required class="w-full px-3 py-2 text-sm input-clean"></select></div>
+          <div><label for="form-ejecutivo" class="block text-xs font-medium text-slate-700 mb-1">Ejecutivo *</label><select id="form-ejecutivo" required class="w-full px-3 py-2 text-sm input-clean"></select></div>
+          <div><label for="form-lider" class="block text-xs font-medium text-slate-700 mb-1">Líder</label><select id="form-lider" class="w-full px-3 py-2 text-sm input-clean"></select></div>
+          <div><label for="form-canal" class="block text-xs font-medium text-slate-700 mb-1">Canal</label><select id="form-canal" class="w-full px-3 py-2 text-sm input-clean"></select></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div><label for="form-fecha-inicio" class="block text-xs font-medium text-slate-700 mb-1">Fecha de Inicio *</label><input id="form-fecha-inicio" type="date" required class="w-full px-3 py-2 text-sm font-mono input-clean" /></div>
+          <div><label for="form-fecha-fin" class="block text-xs font-medium text-slate-700 mb-1">Fecha Fin</label><input id="form-fecha-fin" type="date" class="w-full px-3 py-2 text-sm font-mono input-clean" /></div>
+        </div>
+
+        <div id="form-error-msg" class="hidden p-3 rounded-lg bg-slate-100 border border-slate-300 text-xs text-slate-800 font-medium"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" id="btn-cancel-modal" class="px-4 py-2 rounded-lg btn-secondary text-xs font-medium">Cancelar</button>
+          <button type="submit" id="btn-save-modal" class="px-5 py-2 rounded-lg btn-primary text-xs font-medium">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- MODAL MEJORADO: NUEVO/EDITAR INTERMEDIARIO -->
+  <!-- MODAL 2: NUEVO/EDITAR INTERMEDIARIO (Maestro) -->
   <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 modal-enter">
-      <h3 class="text-lg font-semibold text-slate-900 mb-4">Intermediario (Control)</h3>
+    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 modal-enter max-h-[90vh] overflow-y-auto scroll-clean">
+      <h3 class="text-lg font-semibold text-slate-900 mb-4" id="modal-maestro-title">Intermediario (Control)</h3>
       
       <form id="maestro-form" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -338,7 +384,6 @@
           <input id="form-m-intermediario" type="text" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
         </div>
 
-        <!-- LISTAS DESPLEGABLES -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-700">Ejecutivo *</label>
@@ -354,7 +399,6 @@
           </div>
         </div>
 
-        <!-- CONSTRUCTOR DE CÉDULA Y CORREO -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-200 pt-4">
           <div>
             <label class="block text-xs font-medium text-slate-700">Cédula / RIF</label>
@@ -385,17 +429,22 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-4">
+          <div><label class="block text-xs font-medium text-slate-700">Fecha Nacimiento</label><input id="form-m-fechanac" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" /></div>
+          <div><label class="block text-xs font-medium text-slate-700">Fecha Afiliación</label><input id="form-m-fechaafiliacion" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" /></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-4">
           <div>
             <label class="block text-xs font-medium text-slate-700">Fecha Inicio *</label>
-            <input id="form-m-fechainicio" type="date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+            <input id="form-m-fechainicio" type="date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono" />
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700">Fecha Fin (Libera al ejecutivo)</label>
-            <input id="form-m-fechafin" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-orange-50 text-orange-900 border-orange-200" />
+            <input id="form-m-fechafin" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-orange-50 text-orange-900 border-orange-200 font-mono" />
           </div>
         </div>
         
-        <div id="form-m-error" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded"></div>
+        <div id="form-m-error" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200"></div>
 
         <div class="flex justify-end gap-2 pt-4">
           <button type="button" id="btn-cerrar-modal-maestro" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium">Cancelar</button>
@@ -410,11 +459,11 @@
 
   <script>
     // =========================================================================
-    // CONFIGURACIÓN DE LA API (REEMPLAZA ESTA URL CON TU DESPLIEGUE WEB APP)
+    // CONFIGURACIÓN DE LA API CON TU URL REAL
     // =========================================================================
-    const API_URL = "https://script.google.com/macros/s/TU_ID_DE_DESPLIEGUE/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG/exec";
 
-    // Estado global de la aplicación
+    // Estado global
     const state = {
       currentUser: null,
       historial: [], maestro: [], bitacora: [],
@@ -442,14 +491,13 @@
           mode: 'cors',
           body: JSON.stringify({ action, payload })
         });
-        if (!response.ok) throw new Error('Error de red');
+        if (!response.ok) throw new Error('Error de red al conectar con Google Sheets');
         return await response.json();
       } catch (error) {
-        throw new Error("No se pudo conectar con el servidor.");
+        throw new Error("No se pudo conectar con el servidor. Verifica el despliegue del script.");
       }
     }
 
-    // --- Lógica de Interfaz ---
     function toggleCorreoCustom() {
       const select = document.getElementById('form-m-correo-domain');
       const customInput = document.getElementById('form-m-correo-custom');
@@ -475,38 +523,35 @@
 
     // --- Carga de Datos ---
     async function refrescarTodo(mostrarAviso = false) {
-      if (mostrarAviso) showToast('Sincronizando con Google Sheets...');
-      
+      if (mostrarAviso) showToast('Sincronizando con la base de datos...');
       try {
-        // Modo de desarrollo: Si no hay API_URL, usa datos falsos para probar la interfaz
-        if(API_URL.includes("TU_ID_DE_DESPLIEGUE")) {
-           showToast('⚠️ Modo Local: API_URL no configurada. Mostrando datos de prueba.');
-           state.maestro = [
-             { id: 'INT-001', cod: 'V-123', intermediario: 'Carlos Azocar', ejecutivo: 'Ejecutivo A', sucursal: 'Caracas', activo: 'SI' }
-           ];
-           state.sucursales = ['Caracas', 'Valencia'];
-           state.ejecutivos = ['Ejecutivo A', 'Ejecutivo B'];
-        } else {
-           const res = await apiCall('obtenerDatosSistema');
-           if (res.exito) {
-             state.historial = res.historial || [];
-             state.maestro = res.maestro || [];
-             state.bitacora = res.bitacora || [];
-             state.sucursales = res.sucursales || [];
-             state.ejecutivos = res.ejecutivos || [];
-             state.lideres = res.lideres || [];
-             state.canales = res.canales || [];
-           }
-        }
-        
-        poblarSelect('form-m-sucursal', state.sucursales);
-        poblarSelect('form-m-ejecutivo', state.ejecutivos);
-        poblarSelect('form-m-lider', state.lideres);
-        
-        renderTablaMaestro();
-        // Llama a renderTablaHistorial() y renderTablaBitacora() si implementas sus lógicas
-
-        if (mostrarAviso) showToast('Datos actualizados.');
+         const res = await apiCall('obtenerDatosSistema');
+         if (res.exito) {
+           state.historial = res.historial || [];
+           state.maestro = res.maestro || [];
+           state.bitacora = res.bitacora || [];
+           state.sucursales = res.sucursales || [];
+           state.ejecutivos = res.ejecutivos || [];
+           state.lideres = res.lideres || [];
+           state.canales = res.canales || [];
+           
+           poblarSelect('form-m-sucursal', state.sucursales);
+           poblarSelect('form-m-ejecutivo', state.ejecutivos);
+           poblarSelect('form-m-lider', state.lideres);
+           
+           poblarSelect('form-sucursal', state.sucursales);
+           poblarSelect('form-ejecutivo', state.ejecutivos);
+           poblarSelect('form-lider', state.lideres);
+           poblarSelect('form-canal', state.canales);
+           
+           renderTablaMaestro();
+           renderTablaHistorial();
+           renderTablaBitacora();
+           
+           if (mostrarAviso) showToast('Datos actualizados correctamente.');
+         } else {
+           throw new Error(res.mensaje || "Error al obtener datos");
+         }
       } catch (e) {
         showToast(e.message);
       }
@@ -522,27 +567,75 @@
       state.maestro.forEach(r => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${r.id || '-'}</td>
+          <td class="font-mono text-slate-500">${r.id || '-'}</td>
           <td class="font-medium text-slate-900">${r.intermediario || '-'}</td>
-          <td class="font-mono">${r.cod || '-'}</td>
+          <td class="font-mono font-semibold">${r.cod || '-'}</td>
           <td>${r.ejecutivo || '-'}</td>
-          <td>${r.fechaInicio || '-'}</td>
-          <td>${r.fechaFin || '-'}</td>
+          <td class="font-mono text-[11px]">${r.fechaInicio || '-'}</td>
+          <td class="font-mono text-[11px]">${r.fechaFin || '-'}</td>
           <td>${r.sucursal || '-'}</td>
           <td>${r.lider || '-'}</td>
-          <td><span class="px-2 py-1 rounded text-xs ${r.activo==='SI'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${r.activo||'SI'}</span></td>
-          <td>${r.cedula || '-'}</td>
-          <td>${r.correo || '-'}</td>
-          <td>${r.fechaNac || '-'}</td>
-          <td>${r.fechaAfiliacion || '-'}</td>
-          <td><button class="text-blue-600 hover:underline text-xs btn-edit-maestro" data-cod="${r.cod}">Editar</button></td>
+          <td><span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${r.activo==='SI'?'bg-emerald-50 text-emerald-800 border-emerald-200':'bg-slate-100 text-slate-500 border-slate-200'}">${r.activo||'SI'}</span></td>
+          <td class="font-mono text-slate-600">${r.cedula || '-'}</td>
+          <td class="text-slate-600">${r.correo || '-'}</td>
+          <td class="font-mono text-[11px]">${r.fechaNac || '-'}</td>
+          <td class="font-mono text-[11px]">${r.fechaAfiliacion || '-'}</td>
+          <td class="text-right">
+            <button type="button" class="px-2.5 py-1 rounded-md btn-secondary text-xs font-medium btn-edit-maestro" data-cod="${r.cod}">Editar</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+      dtMaestro = $('#table-dt-maestro').DataTable({ pageLength: 25, scrollX: true, language: { search: "Buscar:" } });
+    }
 
-      dtMaestro = $('#table-dt-maestro').DataTable({
-        pageLength: 25, scrollX: true, language: { search: "Buscar:" }
+    function renderTablaHistorial() {
+      if (dtHistorial) { dtHistorial.destroy(); }
+      const tbody = document.getElementById('historial-tbody');
+      tbody.innerHTML = '';
+      state.historial.forEach(r => {
+        const tr = document.createElement('tr');
+        const isVig = !r.fechaFin;
+        tr.innerHTML = `
+          <td class="font-mono text-slate-500">${r.idUnico || '-'}</td>
+          <td class="font-mono font-semibold">${r.codigo || '-'}</td>
+          <td><span class="px-2 py-0.5 rounded-md text-[11px] font-medium border ${r.estatus==='ACTIVO'?'bg-slate-100 text-slate-800':'bg-slate-100 text-slate-400'}">${r.estatus||'ACTIVO'}</span></td>
+          <td class="font-medium text-slate-900">${r.nombreIntermediario || '-'}</td>
+          <td>${r.nombreTomador || '-'}</td>
+          <td>${r.nombreAsegurado || '-'}</td>
+          <td>${r.sucursal || '-'}</td>
+          <td class="font-medium text-slate-800">${r.ejecutivo || '-'}</td>
+          <td>${r.lider || '-'}</td>
+          <td>${r.canal || '-'}</td>
+          <td class="font-mono text-[11px]">${r.fechaInicio || '-'}</td>
+          <td class="font-mono text-[11px]">${isVig ? '<span class="text-sky-800 font-medium">Vigente</span>' : r.fechaFin}</td>
+          <td class="text-right"><button type="button" class="btn-secondary px-2.5 py-1 rounded-md text-xs" onclick="showToast('Ver historial no implementado aún')">Detalle</button></td>
+        `;
+        tbody.appendChild(tr);
       });
+      dtHistorial = $('#table-dt-historial').DataTable({ pageLength: 25, scrollX: true, language: { search: "Buscar:" } });
+    }
+
+    function renderTablaBitacora() {
+      if (dtBitacora) { dtBitacora.destroy(); }
+      const tbody = document.getElementById('bitacora-tbody');
+      tbody.innerHTML = '';
+      document.getElementById('badge-bitacora-count').textContent = state.bitacora.length;
+      state.bitacora.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="font-mono text-slate-500">${b.idMovimiento || '-'}</td>
+          <td class="font-mono"><div class="font-medium text-slate-900">${b.fecha||'-'}</div><div class="text-slate-400 text-[11px]">${b.hora||'-'}</div></td>
+          <td class="font-medium text-slate-900">${b.usuario || '-'}</td>
+          <td class="text-slate-800">${b.tipoOperacion || '-'}</td>
+          <td><div class="font-mono font-semibold">${b.codigoIntermediario||'-'}</div><div class="text-slate-500">${b.nombreIntermediario||'-'}</div></td>
+          <td class="text-slate-500">${b.datoAnterior || '-'}</td>
+          <td class="font-medium text-slate-900">${b.datoNuevo || '-'}</td>
+          <td class="text-slate-600">${b.detalle || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      dtBitacora = $('#table-dt-bitacora').DataTable({ pageLength: 25, order: [[0, 'desc']], scrollX: true, language: { search: "Buscar:" } });
     }
 
     // --- Eventos y Formularios ---
@@ -553,24 +646,45 @@
         e.preventDefault();
         const btnText = document.getElementById('login-btn-text');
         const btnLoad = document.getElementById('login-loading');
-        btnText.classList.add('hidden'); btnLoad.classList.remove('hidden');
+        const errBox = document.getElementById('login-error-box');
         
-        // Simulación de login para que puedas probar la interfaz localmente
-        setTimeout(() => {
-            document.getElementById('header-user-name').textContent = document.getElementById('login-username').value;
-            document.getElementById('header-user-role').textContent = 'Operador';
+        errBox.classList.add('hidden');
+        btnText.classList.add('hidden'); 
+        btnLoad.classList.remove('hidden');
+        
+        try {
+          const res = await apiCall('autenticarUsuario', {
+            username: document.getElementById('login-username').value,
+            password: document.getElementById('login-password').value
+          });
+
+          if (res.exito) {
+            state.currentUser = res.usuario;
+            document.getElementById('header-user-name').textContent = res.usuario.nombre;
+            document.getElementById('header-user-role').textContent = res.usuario.rol;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
             refrescarTodo(true);
-        }, 800);
+          } else {
+            errBox.textContent = res.mensaje || 'Credenciales incorrectas.';
+            errBox.classList.remove('hidden');
+          }
+        } catch (error) {
+          errBox.textContent = error.message;
+          errBox.classList.remove('hidden');
+        } finally {
+          btnText.classList.remove('hidden'); 
+          btnLoad.classList.add('hidden');
+        }
       });
 
       document.getElementById('btn-logout').addEventListener('click', () => {
+        state.currentUser = null;
         document.getElementById('app-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
       });
 
-      // Pestañas
+      // Tabs
       document.querySelectorAll('.nav-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.getAttribute('data-tab');
@@ -583,6 +697,8 @@
             document.getElementById(sec).classList.toggle('hidden', sec !== target);
           });
           if(dtMaestro) dtMaestro.columns.adjust();
+          if(dtHistorial) dtHistorial.columns.adjust();
+          if(dtBitacora) dtBitacora.columns.adjust();
         });
       });
 
@@ -590,11 +706,71 @@
       document.getElementById('btn-nuevo-maestro').addEventListener('click', () => {
         document.getElementById('maestro-form').reset();
         document.getElementById('form-m-error').classList.add('hidden');
+        document.getElementById('form-m-correo-custom').classList.add('hidden');
         document.getElementById('modal-maestro-overlay').classList.remove('hidden');
+        document.getElementById('modal-maestro-title').textContent = 'Nuevo Intermediario';
+      });
+
+      $('#table-dt-maestro tbody').on('click', '.btn-edit-maestro', function() {
+        const cod = $(this).attr('data-cod');
+        const reg = state.maestro.find(x => x.cod === cod);
+        if (reg) {
+          document.getElementById('maestro-form').reset();
+          document.getElementById('modal-maestro-title').textContent = `Editar Intermediario (${reg.cod})`;
+          
+          document.getElementById('form-m-id').value = reg.id || '';
+          document.getElementById('form-m-cod').value = reg.cod || '';
+          document.getElementById('form-m-activo').value = (reg.activo || 'SI').toUpperCase() === 'NO' ? 'NO' : 'SI';
+          document.getElementById('form-m-intermediario').value = reg.intermediario || '';
+          document.getElementById('form-m-ejecutivo').value = reg.ejecutivo || '';
+          document.getElementById('form-m-sucursal').value = reg.sucursal || '';
+          document.getElementById('form-m-lider').value = reg.lider || '';
+          document.getElementById('form-m-fechainicio').value = reg.fechaInicio || '';
+          document.getElementById('form-m-fechafin').value = reg.fechaFin || '';
+          document.getElementById('form-m-fechanac').value = reg.fechaNac || '';
+          document.getElementById('form-m-fechaafiliacion').value = reg.fechaAfiliacion || '';
+
+          if (reg.cedula) {
+            const match = reg.cedula.match(/^(V-|E-|J-|G-)(.*)$/i);
+            if (match) {
+              document.getElementById('form-m-cedula-tipo').value = match[1].toUpperCase();
+              document.getElementById('form-m-cedula-num').value = match[2];
+            } else {
+              document.getElementById('form-m-cedula-num').value = reg.cedula;
+            }
+          }
+
+          if (reg.correo) {
+            const parts = reg.correo.split('@');
+            if (parts.length === 2) {
+              document.getElementById('form-m-correo-user').value = parts[0];
+              const domain = '@' + parts[1];
+              const domainSelect = document.getElementById('form-m-correo-domain');
+              if (Array.from(domainSelect.options).some(opt => opt.value === domain)) {
+                domainSelect.value = domain;
+              } else {
+                domainSelect.value = 'custom';
+                document.getElementById('form-m-correo-custom').value = domain;
+              }
+              toggleCorreoCustom();
+            } else {
+              document.getElementById('form-m-correo-user').value = reg.correo;
+            }
+          }
+
+          document.getElementById('form-m-error').classList.add('hidden');
+          document.getElementById('modal-maestro-overlay').classList.remove('hidden');
+        }
       });
 
       document.getElementById('btn-cerrar-modal-maestro').addEventListener('click', () => {
         document.getElementById('modal-maestro-overlay').classList.add('hidden');
+      });
+      document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+        document.getElementById('modal-overlay').classList.add('hidden');
+      });
+      document.getElementById('btn-cancel-modal').addEventListener('click', () => {
+        document.getElementById('modal-overlay').classList.add('hidden');
       });
 
       // Guardar Maestro
@@ -609,7 +785,6 @@
 
         const cedTipo = document.getElementById('form-m-cedula-tipo').value;
         const cedNum = document.getElementById('form-m-cedula-num').value.trim();
-        
         const correoUser = document.getElementById('form-m-correo-user').value.trim();
         const correoDomain = document.getElementById('form-m-correo-domain').value;
 
@@ -624,26 +799,20 @@
           correo: correoUser ? (correoUser + (correoDomain === 'custom' ? document.getElementById('form-m-correo-custom').value.trim() : correoDomain)) : "",
           fechaInicio: document.getElementById('form-m-fechainicio').value,
           fechaFin: document.getElementById('form-m-fechafin').value,
+          fechaNac: document.getElementById('form-m-fechanac').value,
+          fechaAfiliacion: document.getElementById('form-m-fechaafiliacion').value,
           activo: document.getElementById('form-m-activo').value
         };
 
         try {
-          if(API_URL.includes("AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG")) {
-             // Simular guardado local si no hay API
-             state.maestro.unshift(payload);
-             renderTablaMaestro();
-             document.getElementById('modal-maestro-overlay').classList.add('hidden');
-             showToast("Guardado localmente (Modo de prueba)");
+          const respuesta = await apiCall('guardarIntermediarioMaestro', payload);
+          if (respuesta.exito) {
+            showToast("Intermediario guardado exitosamente");
+            document.getElementById('modal-maestro-overlay').classList.add('hidden');
+            refrescarTodo(); 
           } else {
-             const respuesta = await apiCall('guardarIntermediarioMaestro', payload);
-             if (respuesta.exito) {
-               showToast("Intermediario guardado exitosamente");
-               document.getElementById('modal-maestro-overlay').classList.add('hidden');
-               refrescarTodo();
-             } else {
-               errBox.textContent = respuesta.mensaje; // Aquí muestra el error de Fecha Fin
-               errBox.classList.remove('hidden');
-             }
+            errBox.textContent = respuesta.mensaje; 
+            errBox.classList.remove('hidden');
           }
         } catch(err) {
           errBox.textContent = err.message;
@@ -653,6 +822,10 @@
         }
       });
       
+      // Refrescos manuales
+      document.getElementById('btn-refresh-table').addEventListener('click', () => refrescarTodo(true));
+      document.getElementById('btn-refresh-maestro').addEventListener('click', () => refrescarTodo(true));
+      document.getElementById('btn-refresh-bitacora').addEventListener('click', () => refrescarTodo(true));
     });
   </script>
 </body>
