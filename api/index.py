@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from fastapi import FastAPI, Depends, HTTPException, Query, status
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -62,6 +62,10 @@ def get_root():
 
 @app.get("/login", response_class=HTMLResponse)
 def get_login():
+    return render_html_page("login.html")
+
+@app.get("/api/index.py", response_class=HTMLResponse)
+def get_api_index_fallback():
     return render_html_page("login.html")
 
 @app.get("/intermediarios", response_class=HTMLResponse)
@@ -184,6 +188,34 @@ def guardar_intermediario(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
+# =============================================================================
+# ENRUTADOR UNIVERSAL (CATCH-ALL) - Evita cualquier error 404 en Vercel
+# =============================================================================
+@app.api_route("/{path_name:path}", methods=["GET"])
+async def catch_all_views(request: Request, path_name: str):
+    clean = path_name.lower().strip("/")
+
+    # Archivos estáticos si se piden directamente
+    if clean.startswith("css/") or clean.startswith("js/"):
+        file_path = PUBLIC_DIR / clean
+        if file_path.exists():
+            media = "text/css" if clean.endswith(".css") else "application/javascript"
+            return HTMLResponse(content=file_path.read_text(encoding="utf-8"), media_type=media)
+
+    if "intermediarios" in clean and "historico" not in clean:
+        return render_html_page("intermediarios.html")
+    elif "historico-reclasificaciones" in clean or "historico_reclasificaciones" in clean:
+        return render_html_page("historico_reclasificaciones.html")
+    elif "historico" in clean:
+        return render_html_page("historico.html")
+    elif "reclasificaciones" in clean:
+        return render_html_page("reclasificaciones.html")
+    elif "bitacora" in clean:
+        return render_html_page("bitacora.html")
+    else:
+        # Por defecto muestra la interfaz de inicio de sesión
+        return render_html_page("login.html")
+
 @app.post("/api/intermediarios/estatus")
 def cambiar_estatus_intermediario(
     payload: EstatusMaestroPayload,
@@ -203,6 +235,34 @@ def cambiar_estatus_intermediario(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+# =============================================================================
+# ENRUTADOR UNIVERSAL (CATCH-ALL) - Evita cualquier error 404 en Vercel
+# =============================================================================
+@app.api_route("/{path_name:path}", methods=["GET"])
+async def catch_all_views(request: Request, path_name: str):
+    clean = path_name.lower().strip("/")
+
+    # Archivos estáticos si se piden directamente
+    if clean.startswith("css/") or clean.startswith("js/"):
+        file_path = PUBLIC_DIR / clean
+        if file_path.exists():
+            media = "text/css" if clean.endswith(".css") else "application/javascript"
+            return HTMLResponse(content=file_path.read_text(encoding="utf-8"), media_type=media)
+
+    if "intermediarios" in clean and "historico" not in clean:
+        return render_html_page("intermediarios.html")
+    elif "historico-reclasificaciones" in clean or "historico_reclasificaciones" in clean:
+        return render_html_page("historico_reclasificaciones.html")
+    elif "historico" in clean:
+        return render_html_page("historico.html")
+    elif "reclasificaciones" in clean:
+        return render_html_page("reclasificaciones.html")
+    elif "bitacora" in clean:
+        return render_html_page("bitacora.html")
+    else:
+        # Por defecto muestra la interfaz de inicio de sesión
+        return render_html_page("login.html")
 
 @app.post("/api/reclasificaciones/guardar")
 def guardar_reclasificacion(
@@ -225,4 +285,32 @@ def guardar_reclasificacion(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+# =============================================================================
+# ENRUTADOR UNIVERSAL (CATCH-ALL) - Evita cualquier error 404 en Vercel
+# =============================================================================
+@app.api_route("/{path_name:path}", methods=["GET"])
+async def catch_all_views(request: Request, path_name: str):
+    clean = path_name.lower().strip("/")
+
+    # Archivos estáticos si se piden directamente
+    if clean.startswith("css/") or clean.startswith("js/"):
+        file_path = PUBLIC_DIR / clean
+        if file_path.exists():
+            media = "text/css" if clean.endswith(".css") else "application/javascript"
+            return HTMLResponse(content=file_path.read_text(encoding="utf-8"), media_type=media)
+
+    if "intermediarios" in clean and "historico" not in clean:
+        return render_html_page("intermediarios.html")
+    elif "historico-reclasificaciones" in clean or "historico_reclasificaciones" in clean:
+        return render_html_page("historico_reclasificaciones.html")
+    elif "historico" in clean:
+        return render_html_page("historico.html")
+    elif "reclasificaciones" in clean:
+        return render_html_page("reclasificaciones.html")
+    elif "bitacora" in clean:
+        return render_html_page("bitacora.html")
+    else:
+        # Por defecto muestra la interfaz de inicio de sesión
+        return render_html_page("login.html")
 
