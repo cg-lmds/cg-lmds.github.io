@@ -18,7 +18,7 @@ function checkAuth(requiredRoles = []) {
 
   if (!token || !user) {
     if (!window.location.pathname.includes('login')) {
-      window.location.href = '/login';
+      window.location.href = '/login.html';
     }
     return null;
   }
@@ -29,7 +29,7 @@ function checkAuth(requiredRoles = []) {
     const hasRole = requiredRoles.some(r => r.toLowerCase() === userRole);
     if (!hasRole) {
       alert(`Acceso no autorizado: Su rol (${user.rol}) no tiene permisos para esta sección.`);
-      window.location.href = '/intermediarios';
+      window.location.href = '/intermediarios.html';
       return null;
     }
   }
@@ -50,7 +50,7 @@ function updateHeaderUI(user) {
     logoutBtn.onclick = () => {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      window.location.href = '/login';
+      window.location.href = '/login.html';
     };
   }
 }

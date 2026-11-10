@@ -67,7 +67,7 @@
     // Si ya existe sesión activa, redirigir directo al sistema
     const existingToken = localStorage.getItem(TOKEN_KEY);
     if (existingToken) {
-      window.location.href = '/intermediarios';
+      window.location.href = '/intermediarios.html';
     }
 
     const form = document.getElementById('login-form');
@@ -92,7 +92,7 @@
         localStorage.setItem(TOKEN_KEY, res.access_token);
         localStorage.setItem(USER_KEY, JSON.stringify(res.usuario));
 
-        window.location.href = '/intermediarios';
+        window.location.href = '/intermediarios.html';
       } catch (err) {
         errBox.textContent = err.message || 'Error al autenticar.';
         errBox.classList.remove('hidden');

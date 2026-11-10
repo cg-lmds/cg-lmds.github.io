@@ -29,7 +29,7 @@ async function apiFetch(endpoint, options = {}) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       if (!window.location.pathname.includes('login')) {
-        window.location.href = '/login';
+        window.location.href = '/login.html';
       }
       throw new Error('Sesión expirada. Por favor inicie sesión nuevamente.');
     }
