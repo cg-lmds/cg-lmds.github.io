@@ -15,148 +15,257 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <style>
+    /* Geometría estricta: Cero bordes redondeados, cero degradados */
+    *, *::before, *::after {
+      border-radius: 0px !important;
+      background-image: none !important;
+    }
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #f1f5f9;
+      background-color: #f8fafc;
       color: #0f172a;
       -webkit-font-smoothing: antialiased;
     }
-    .surface-card {
-      background: #ffffff;
-      border: 1px solid #dbeafe;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
     }
-    .bg-navy { background-color: #0f2942; }
-    .text-navy { color: #0f2942; }
-    
-    .btn-primary {
-      background-color: #0f2942;
+
+    .surface-box {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Botones sobrios con micro-transición */
+    .btn-dark {
+      background-color: #0f172a;
       color: #ffffff;
-      transition: all 0.18s ease;
+      border: 1px solid #0f172a;
+      transition: background-color 0.16s ease, color 0.16s ease, transform 0.12s ease;
     }
-    .btn-primary:hover:not(:disabled) {
-      background-color: #1e3a5f;
-      box-shadow: 0 4px 10px rgba(15, 41, 66, 0.18);
+    .btn-dark:hover:not(:disabled) {
+      background-color: #1e293b;
+      border-color: #1e293b;
     }
-    .btn-secondary {
-      background-color: #eff6ff;
-      color: #0f2942;
-      border: 1px solid #bfdbfe;
-      transition: all 0.18s ease;
+    .btn-dark:active:not(:disabled) {
+      transform: translateY(1px);
     }
-    .btn-secondary:hover:not(:disabled) {
-      background-color: #dbeafe;
-      border-color: #93c5fd;
+
+    .btn-outline {
+      background-color: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      transition: background-color 0.16s ease, border-color 0.16s ease;
     }
+    .btn-outline:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #0f172a;
+    }
+
     .btn-emerald {
-      background-color: #059669;
+      background-color: #065f46;
       color: #ffffff;
-      transition: all 0.18s ease;
+      border: 1px solid #065f46;
+      transition: background-color 0.16s ease;
     }
     .btn-emerald:hover:not(:disabled) {
       background-color: #047857;
+      border-color: #047857;
     }
-    .input-clean {
+
+    /* Inputs minimalistas */
+    .input-flat {
       background-color: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 0.5rem;
       color: #0f172a;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.15s ease;
     }
-    .input-clean:focus {
+    .input-flat:focus {
       outline: none;
-      border-color: #0f2942;
-      box-shadow: 0 0 0 3px rgba(15, 41, 66, 0.1);
+      border-color: #0f172a;
     }
-    
-    /* DataTables Estilizado */
-    .dataTables_wrapper { padding: 0.85rem 1rem; font-size: 0.75rem; color: #334155; }
+
+    /* Pestañas superiores estilo editorial */
+    .nav-tab {
+      border-bottom: 2px solid transparent;
+      color: #64748b;
+      transition: color 0.16s ease, border-color 0.16s ease;
+    }
+    .nav-tab:hover {
+      color: #0f172a;
+    }
+    .nav-tab-active {
+      border-bottom: 2px solid #0f172a;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Animaciones limpias para Modales y Alertas */
+    .modal-backdrop {
+      animation: fadeBackdrop 0.18s ease forwards;
+    }
+    .modal-panel {
+      animation: slidePanel 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .toast-item {
+      animation: slideToast 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeBackdrop {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slidePanel {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideToast {
+      from { opacity: 0; transform: translateX(16px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* DataTables: Encabezado único, sin doble fila fantasma */
+    .dataTables_wrapper {
+      padding: 0;
+      font-size: 0.75rem;
+      color: #334155;
+    }
+    .dt-top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      background-color: #ffffff;
+    }
+    .dt-bottom-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      background-color: #ffffff;
+    }
+    .dt-table-scroll {
+      width: 100%;
+      overflow-x: auto;
+    }
     .dataTables_wrapper .dataTables_length select,
     .dataTables_wrapper .dataTables_filter input {
       border: 1px solid #cbd5e1;
-      border-radius: 0.4rem;
       padding: 0.3rem 0.6rem;
       background-color: #ffffff;
+      color: #0f172a;
       outline: none;
+      margin-left: 0.35rem;
     }
-    .dataTables_wrapper .dataTables_filter input:focus { border-color: #0f2942; }
+    .dataTables_wrapper .dataTables_filter input:focus {
+      border-color: #0f172a;
+    }
+    table.dataTable {
+      width: 100% !important;
+      margin: 0 !important;
+      border-collapse: collapse !important;
+    }
     table.dataTable thead th {
-      background-color: #eff6ff !important;
-      color: #0f2942 !important;
-      border-bottom: 2px solid #bfdbfe !important;
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+      border-bottom: 1px solid #cbd5e1 !important;
       font-weight: 600 !important;
       text-transform: uppercase;
       font-size: 0.68rem;
-      letter-spacing: 0.04em;
-      padding: 0.65rem 0.75rem !important;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 0.85rem !important;
       white-space: nowrap;
+      text-align: left;
     }
     table.dataTable tbody td {
       border-bottom: 1px solid #f1f5f9 !important;
-      padding: 0.55rem 0.75rem !important;
+      padding: 0.65rem 0.85rem !important;
       white-space: nowrap;
       font-size: 0.75rem;
+      color: #1e293b;
     }
-    table.dataTable tbody tr:hover { background-color: #f8fafc !important; }
+    table.dataTable tbody tr:hover {
+      background-color: #f8fafc !important;
+    }
+    table.dataTable.no-footer {
+      border-bottom: none !important;
+    }
     .dataTables_wrapper .dataTables_paginate .paginate_button {
       padding: 0.25rem 0.65rem !important;
-      border-radius: 0.4rem !important;
-      border: 1px solid #e2e8f0 !important;
+      border: 1px solid #cbd5e1 !important;
       background: #ffffff !important;
-      color: #0f2942 !important;
+      color: #0f172a !important;
       margin-left: 0.2rem !important;
+      font-size: 0.72rem !important;
     }
     .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-      background: #0f2942 !important;
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.disabled) {
+      background: #0f172a !important;
       color: #ffffff !important;
-      border-color: #0f2942 !important;
+      border-color: #0f172a !important;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-  <!-- Contenedor de Alertas Verdes / Rojas -->
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+  <!-- Contenedor de Alertas Superiores -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Pop-up de Confirmación Minimalista -->
+  <div id="swal-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 max-w-sm w-full p-6 modal-panel shadow-2xl">
+      <div class="border-l-4 border-emerald-700 pl-3 mb-3">
+        <h3 id="swal-title" class="text-sm font-bold text-slate-900 uppercase tracking-wide">Confirmación</h3>
+      </div>
+      <p id="swal-text" class="text-xs text-slate-600 leading-relaxed mb-6"></p>
+      <div class="flex items-center justify-end gap-2 border-t border-slate-200 pt-4">
+        <button type="button" id="swal-btn-cancel" class="px-4 py-2 btn-outline text-xs font-semibold uppercase tracking-wider">Cancelar</button>
+        <button type="button" id="swal-btn-confirm" class="px-5 py-2 btn-emerald text-xs font-semibold uppercase tracking-wider">Confirmar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================================================================== -->
   <!-- 1. PANTALLA DE INICIO DE SESIÓN                                       -->
   <!-- ===================================================================== -->
   <div id="login-screen" class="flex-1 flex items-center justify-center p-4">
-    <div class="w-full max-w-md surface-card p-8">
-      <div class="mb-6 border-b border-blue-100 pb-4">
-        <h1 class="text-lg font-bold text-navy tracking-tight">
+    <div class="w-full max-w-md surface-box p-8 shadow-sm">
+      <div class="mb-6 border-b border-slate-200 pb-4">
+        <h1 class="text-base font-bold text-slate-900 uppercase tracking-wider">
           Control de intermediarios y reclasificaciones
         </h1>
         <p class="text-xs text-slate-500 mt-1">
-          Ingresa tus credenciales para acceder al sistema
+          Ingrese sus credenciales de acceso
         </p>
       </div>
 
       <form id="login-form" class="space-y-4">
-        <div id="login-error-box" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+        <div id="login-error-box" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
         
         <div>
-          <label for="login-username" class="block text-xs font-semibold text-slate-700 mb-1">Usuario</label>
-          <input id="login-username" type="text" required autocomplete="username" placeholder="Ingresa tu usuario" class="w-full px-3.5 py-2 text-sm input-clean" />
+          <label for="login-username" class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Usuario</label>
+          <input id="login-username" type="text" required autocomplete="username" placeholder="Usuario" class="w-full px-3.5 py-2.5 text-sm input-flat" />
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="login-password" class="block text-xs font-semibold text-slate-700">Contraseña</label>
-            <button type="button" id="btn-toggle-pass" class="text-xs text-navy hover:underline">Mostrar</button>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="login-password" class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700">Contraseña</label>
+            <button type="button" id="btn-toggle-pass" class="text-[11px] text-slate-500 hover:text-slate-900 uppercase tracking-wider font-medium">Mostrar</button>
           </div>
-          <input id="login-password" type="password" required autocomplete="current-password" placeholder="Ingresa tu contraseña" class="w-full px-3.5 py-2 text-sm input-clean" />
+          <input id="login-password" type="password" required autocomplete="current-password" placeholder="Contraseña" class="w-full px-3.5 py-2.5 text-sm input-flat" />
         </div>
 
-        <div class="pt-2">
-          <button type="submit" id="btn-login-submit" class="w-full py-2.5 px-4 rounded-lg btn-primary font-semibold text-sm flex items-center justify-center gap-2">
+        <div class="pt-3">
+          <button type="submit" id="btn-login-submit" class="w-full py-2.5 px-4 btn-dark font-semibold text-xs uppercase tracking-wider">
             <span id="login-btn-text">Iniciar sesión</span>
-            <span id="login-loading" class="hidden">Verificando y cargando datos...</span>
+            <span id="login-loading" class="hidden">Verificando acceso...</span>
           </button>
         </div>
       </form>
@@ -164,103 +273,105 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 2. SISTEMA PRINCIPAL                                                  -->
+  <!-- 2. APLICACIÓN PRINCIPAL                                               -->
   <!-- ===================================================================== -->
   <div id="app-screen" class="hidden flex-1 flex flex-col">
-    <!-- Barra Superior sin logos corporativos -->
-    <header class="bg-navy text-white sticky top-0 z-30 shadow-sm">
-      <div class="max-w-[1600px] mx-auto px-4 sm:px-6 min-h-[3.5rem] py-2 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-6">
-          <span class="text-sm sm:text-base font-bold tracking-tight text-white">
+    <!-- Encabezado Editorial Sobrio -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-[1600px] mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-8">
+          <span class="py-4 text-sm font-bold uppercase tracking-wider text-slate-900 border-r border-slate-200 pr-6">
             Control de intermediarios y reclasificaciones
           </span>
 
-          <!-- Navegación de las 3 Pestañas Solicitadas -->
-          <nav class="flex flex-wrap items-center gap-1.5">
-            <button type="button" data-tab="tab-maestro" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-navy transition flex items-center gap-2">
+          <!-- Pestañas de Navegación -->
+          <nav class="flex flex-wrap items-center gap-6">
+            <button type="button" data-tab="tab-maestro" class="nav-tab nav-tab-active py-4 text-xs flex items-center gap-2">
               <span>Control de intermediarios</span>
-              <span id="badge-maestro" class="px-1.5 py-0.5 rounded bg-blue-100 text-navy font-mono text-[10px] font-bold">0</span>
+              <span id="badge-maestro" class="px-1.5 py-0.5 bg-slate-100 text-slate-800 font-mono text-[10px] font-semibold">0</span>
             </button>
-            <button type="button" data-tab="tab-historico-maestro" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-blue-100 hover:bg-white/10 transition flex items-center gap-2">
+            <button type="button" data-tab="tab-historico-maestro" class="nav-tab py-4 text-xs flex items-center gap-2">
               <span>Histórico de control de intermediarios</span>
-              <span id="badge-historico-maestro" class="px-1.5 py-0.5 rounded bg-white/20 text-white font-mono text-[10px] font-bold">0</span>
+              <span id="badge-historico-maestro" class="px-1.5 py-0.5 bg-slate-100 text-slate-800 font-mono text-[10px] font-semibold">0</span>
             </button>
-            <button type="button" data-tab="tab-reclasificacion" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-blue-100 hover:bg-white/10 transition flex items-center gap-2">
+            <button type="button" data-tab="tab-reclasificacion" class="nav-tab py-4 text-xs flex items-center gap-2">
               <span>Control de reclasificación</span>
-              <span id="badge-reclasificacion" class="px-1.5 py-0.5 rounded bg-white/20 text-white font-mono text-[10px] font-bold">0</span>
+              <span id="badge-reclasificacion" class="px-1.5 py-0.5 bg-slate-100 text-slate-800 font-mono text-[10px] font-semibold">0</span>
             </button>
           </nav>
         </div>
 
-        <div class="flex items-center gap-3">
-          <span id="sync-indicator" class="hidden text-[11px] bg-emerald-600/90 text-white px-2.5 py-1 rounded-md font-medium">
-            Sincronizando...
+        <div class="flex items-center gap-3 py-2">
+          <span id="sync-indicator" class="hidden text-[11px] bg-emerald-800 text-white px-2.5 py-1 font-medium uppercase tracking-wider">
+            Sincronizando
           </span>
-          <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 text-xs text-blue-50">
+          <div class="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-100 text-xs text-slate-800 border border-slate-200">
             <span id="header-user-name" class="font-semibold">Usuario</span>
-            <span class="opacity-50">·</span>
-            <span id="header-user-role" class="text-[11px] opacity-80">Rol</span>
+            <span class="text-slate-400">|</span>
+            <span id="header-user-role" class="text-[11px] text-slate-500 uppercase">Rol</span>
           </div>
-          <button type="button" id="btn-logout" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
-            Cerrar sesión
+          <button type="button" id="btn-logout" class="px-3 py-1.5 btn-outline text-xs font-medium">
+            Salir
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Contenido de las 3 Vistas -->
-    <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-5 flex-1 space-y-4">
+    <!-- Contenido Principal -->
+    <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-4">
 
       <!-- ================================================================= -->
-      <!-- VISTA 1 (PRINCIPAL): CONTROL DE INTERMEDIARIOS (13 COLUMNAS)      -->
+      <!-- VISTA 1: CONTROL DE INTERMEDIARIOS (SIN COLUMNA ID VISIBLE)       -->
       <!-- ================================================================= -->
-      <section id="tab-maestro" class="space-y-3">
-        <div class="surface-card p-3.5 flex flex-wrap items-center justify-between gap-3 bg-blue-50/40">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <h2 class="text-sm font-bold text-navy mr-2">Control de intermediarios</h2>
-            <select id="filter-m-sucursal" class="px-2.5 py-1.5 text-xs input-clean">
+      <section id="tab-maestro" class="space-y-4">
+        <div class="surface-box p-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-900 mr-2">Control de intermediarios</span>
+            <select id="filter-m-sucursal" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Sucursal: Todas</option>
             </select>
-            <select id="filter-m-ejecutivo" class="px-2.5 py-1.5 text-xs input-clean">
+            <select id="filter-m-ejecutivo" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Ejecutivo: Todos</option>
             </select>
-            <select id="filter-m-activo" class="px-2.5 py-1.5 text-xs input-clean">
+            <select id="filter-m-lider" class="px-2.5 py-1.5 text-xs input-flat">
+              <option value="ALL">Líder: Todos</option>
+            </select>
+            <select id="filter-m-activo" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Activo: Todos</option>
               <option value="SI">Solo Activos (SI)</option>
               <option value="NO">Solo Inactivos (NO)</option>
             </select>
-            <button type="button" id="btn-clear-m-filters" class="px-2.5 py-1 text-xs text-navy hover:underline font-medium">
-              Limpiar filtros
+            <button type="button" id="btn-clear-m-filters" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-900 underline">
+              Limpiar
             </button>
           </div>
 
           <div class="flex items-center gap-2">
-            <button type="button" class="btn-sync-now px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+            <button type="button" class="btn-sync-now px-3 py-1.5 btn-outline text-xs font-medium">
               ↻ Sincronizar
             </button>
-            <button type="button" id="btn-nuevo-maestro" class="px-3.5 py-1.5 rounded-lg btn-emerald text-xs font-semibold shadow-sm">
+            <button type="button" id="btn-nuevo-maestro" class="px-4 py-1.5 btn-dark text-xs font-semibold">
               + Nuevo intermediario
             </button>
           </div>
         </div>
 
-        <div class="surface-card overflow-hidden">
-          <table id="table-dt-maestro" class="w-full text-left display nowrap" style="width:100%">
+        <div class="surface-box">
+          <table id="table-dt-maestro" class="w-full text-left">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>INTERMEDIARIO</th>
                 <th>COD</th>
                 <th>EJECUTIVO</th>
                 <th>FECHA INICIO</th>
                 <th>FECHA FIN</th>
                 <th>SUCURSAL</th>
-                <th>LIDER</th>
+                <th>LÍDER</th>
                 <th>ACTIVO</th>
-                <th>CEDULA</th>
+                <th>CÉDULA / RIF</th>
                 <th>CORREO</th>
                 <th>FECHA NAC</th>
-                <th>FECHA AFILIACION</th>
+                <th>FECHA AFILIACIÓN</th>
                 <th class="text-right">ACCIONES</th>
               </tr>
             </thead>
@@ -270,37 +381,35 @@
       </section>
 
       <!-- ================================================================= -->
-      <!-- VISTA 2: HISTÓRICO DE CONTROL DE INTERMEDIARIOS (14 COLUMNAS)     -->
+      <!-- VISTA 2: HISTÓRICO DE CONTROL DE INTERMEDIARIOS (SIN IDs)         -->
       <!-- ================================================================= -->
-      <section id="tab-historico-maestro" class="hidden space-y-3">
-        <div class="surface-card p-3.5 flex flex-wrap items-center justify-between gap-3 bg-blue-50/40">
+      <section id="tab-historico-maestro" class="hidden space-y-4">
+        <div class="surface-box p-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-bold text-navy">Histórico de control de intermediarios</h2>
-            <p class="text-xs text-slate-500">Respaldo automático de asignaciones anteriores cerradas al cambiar de ejecutivo.</p>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900">Histórico de control de intermediarios</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Respaldo histórico de asignaciones cerradas cuando un intermediario cambia de ejecutivo.</p>
           </div>
-          <button type="button" class="btn-sync-now px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+          <button type="button" class="btn-sync-now px-3 py-1.5 btn-outline text-xs font-medium">
             ↻ Sincronizar
           </button>
         </div>
 
-        <div class="surface-card overflow-hidden">
-          <table id="table-dt-historico-maestro" class="w-full text-left display nowrap" style="width:100%">
+        <div class="surface-box">
+          <table id="table-dt-historico-maestro" class="w-full text-left">
             <thead>
               <tr>
-                <th>ID HISTÓRICO</th>
-                <th>ID</th>
                 <th>INTERMEDIARIO</th>
                 <th>COD</th>
                 <th>EJECUTIVO ANTERIOR</th>
                 <th>FECHA INICIO</th>
                 <th>FECHA FIN (CIERRE)</th>
                 <th>SUCURSAL</th>
-                <th>LIDER</th>
+                <th>LÍDER</th>
                 <th>ACTIVO</th>
-                <th>CEDULA</th>
+                <th>CÉDULA / RIF</th>
                 <th>CORREO</th>
                 <th>FECHA NAC</th>
-                <th>FECHA AFILIACION</th>
+                <th>FECHA AFILIACIÓN</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -309,45 +418,58 @@
       </section>
 
       <!-- ================================================================= -->
-      <!-- VISTA 3: CONTROL DE RECLASIFICACIÓN (HOJA HISTORIAL COMPLETA)     -->
+      <!-- VISTA 3: CONTROL DE RECLASIFICACIÓN (SIN COLUMNA ID VISIBLE)      -->
       <!-- ================================================================= -->
-      <section id="tab-reclasificacion" class="hidden space-y-3">
-        <div class="surface-card p-3.5 flex flex-wrap items-center justify-between gap-3 bg-blue-50/40">
+      <section id="tab-reclasificacion" class="hidden space-y-4">
+        <div class="surface-box p-4 flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-2">
-            <h2 class="text-sm font-bold text-navy mr-2">Control de reclasificación</h2>
-            <select id="filter-r-sucursal" class="px-2.5 py-1.5 text-xs input-clean">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-900 mr-2">Control de reclasificación</span>
+            <select id="filter-r-sucursal" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Sucursal: Todas</option>
             </select>
-            <select id="filter-r-ejecutivo" class="px-2.5 py-1.5 text-xs input-clean">
+            <select id="filter-r-ejecutivo" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Ejecutivo: Todos</option>
             </select>
-            <select id="filter-r-vigencia" class="px-2.5 py-1.5 text-xs input-clean">
+            <select id="filter-r-lider" class="px-2.5 py-1.5 text-xs input-flat">
+              <option value="ALL">Líder: Todos</option>
+            </select>
+            <select id="filter-r-canal" class="px-2.5 py-1.5 text-xs input-flat">
+              <option value="ALL">Canal: Todos</option>
+            </select>
+            <select id="filter-r-vigencia" class="px-2.5 py-1.5 text-xs input-flat">
               <option value="ALL">Vigencia: Todas</option>
               <option value="OPEN">Solo Vigentes</option>
               <option value="CLOSED">Solo Cerrados</option>
             </select>
+            <select id="filter-r-estatus" class="px-2.5 py-1.5 text-xs input-flat">
+              <option value="ALL">Estatus: Todos</option>
+              <option value="ACTIVO">Código Activo</option>
+              <option value="INACTIVO">Código Inactivo</option>
+            </select>
+            <button type="button" id="btn-clear-r-filters" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-900 underline">
+              Limpiar
+            </button>
           </div>
 
           <div class="flex items-center gap-2">
-            <button type="button" class="btn-sync-now px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+            <button type="button" class="btn-sync-now px-3 py-1.5 btn-outline text-xs font-medium">
               ↻ Sincronizar
             </button>
-            <button type="button" id="btn-nueva-reclasificacion" class="px-3.5 py-1.5 rounded-lg btn-emerald text-xs font-semibold shadow-sm">
-              + Nueva reclasificación
+            <button type="button" id="btn-nueva-reclasificacion" class="px-4 py-1.5 btn-dark text-xs font-semibold">
+              + Nuevo registro
             </button>
           </div>
         </div>
 
-        <div class="surface-card overflow-hidden">
-          <table id="table-dt-reclasificacion" class="w-full text-left display nowrap" style="width:100%">
+        <div class="surface-box">
+          <table id="table-dt-reclasificacion" class="w-full text-left">
             <thead>
               <tr>
-                <th>ID ÚNICO</th>
                 <th>CÓDIGO</th>
                 <th>ESTATUS</th>
                 <th>INTERMEDIARIO CORREGIDO</th>
-                <th>NOMBRE DEL TOMADOR</th>
-                <th>NOMBRE DEL ASEGURADO</th>
+                <th>TOMADOR</th>
+                <th>ASEGURADO</th>
                 <th>SUCURSAL RECLASIFICADA</th>
                 <th>EJECUTIVO RECLASIFICADO</th>
                 <th>LÍDER RECLASIFICADO</th>
@@ -367,40 +489,39 @@
     </main>
   </div>
 
-  <!-- PIE DE PÁGINA SOLICITADO -->
-  <footer class="bg-white border-t border-blue-100 py-3 px-4 text-center text-xs text-slate-600 font-medium">
+  <!-- PIE DE PÁGINA -->
+  <footer class="bg-white border-t border-slate-200 py-3.5 px-4 text-center text-xs text-slate-500 font-medium">
     Desarrollado y administrado por el departamento de control y gestión
   </footer>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 1: CONTROL DE INTERMEDIARIOS (13 CAMPOS + VALIDACIÓN FECHA FIN) -->
+  <!-- MODAL A: CONTROL DE INTERMEDIARIOS (ID OCULTO)                        -->
   <!-- ===================================================================== -->
-  <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl border border-blue-100 max-w-3xl w-full p-6 max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-blue-100 pb-3 mb-4">
+  <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 shadow-2xl max-w-2xl w-full p-6 max-h-[92vh] overflow-y-auto modal-panel">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
         <div>
-          <h3 id="modal-maestro-title" class="text-base font-bold text-navy">Nuevo intermediario</h3>
-          <p id="modal-maestro-subtitle" class="text-xs text-slate-500">Los selectores están conectados a la hoja Control.</p>
+          <h3 id="modal-maestro-title" class="text-sm font-bold uppercase tracking-wider text-slate-900">Nuevo intermediario</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Complete los datos del intermediario.</p>
         </div>
-        <button type="button" id="btn-cerrar-modal-maestro" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-500 hover:bg-slate-100">Cerrar ✕</button>
+        <button type="button" id="btn-cerrar-modal-maestro" class="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-slate-900">✕</button>
       </div>
 
-      <!-- Aviso dinámico de regla de Ejecutivo / Fecha Fin -->
-      <div id="aviso-bloqueo-ejecutivo" class="hidden mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-navy"></div>
+      <!-- Aviso de regla de negocio Fecha Fin -->
+      <div id="aviso-bloqueo-ejecutivo" class="hidden mb-4 p-3 bg-slate-50 border-l-4 border-slate-800 text-xs text-slate-700"></div>
 
       <form id="maestro-form" class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">ID (Automático)</label>
-            <input id="form-m-id" type="text" readonly placeholder="Auto" class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-mono text-slate-600" />
-          </div>
+        <!-- ID 100% oculto al usuario -->
+        <input type="hidden" id="form-m-id" value="" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Código (COD) *</label>
-            <input id="form-m-cod" type="text" required placeholder="Ej. 206" class="w-full px-3 py-2 input-clean text-sm font-mono uppercase" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Código (COD) *</label>
+            <input id="form-m-cod" type="text" required placeholder="Ej. 206" class="w-full px-3 py-2 input-flat text-sm font-mono uppercase" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Activo *</label>
-            <select id="form-m-activo" class="w-full px-3 py-2 input-clean text-sm font-semibold">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Activo *</label>
+            <select id="form-m-activo" class="w-full px-3 py-2 input-flat text-sm font-semibold">
               <option value="SI">SI</option>
               <option value="NO">NO</option>
             </select>
@@ -408,31 +529,30 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del Intermediario *</label>
-          <input id="form-m-intermediario" type="text" required placeholder="Nombre completo o razón social" class="w-full px-3 py-2 input-clean text-sm" />
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Nombre del Intermediario *</label>
+          <input id="form-m-intermediario" type="text" required placeholder="Nombre completo o razón social" class="w-full px-3 py-2 input-flat text-sm" />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Ejecutivo (Hoja Control) *</label>
-            <select id="form-m-ejecutivo" required class="w-full px-3 py-2 input-clean text-sm"></select>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Ejecutivo *</label>
+            <select id="form-m-ejecutivo" required class="w-full px-3 py-2 input-flat text-sm"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Sucursal (Hoja Control) *</label>
-            <select id="form-m-sucursal" required class="w-full px-3 py-2 input-clean text-sm"></select>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Sucursal *</label>
+            <select id="form-m-sucursal" required class="w-full px-3 py-2 input-flat text-sm"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Líder Asignado (Hoja Control)</label>
-            <select id="form-m-lider" class="w-full px-3 py-2 input-clean text-sm"></select>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Líder Asignado</label>
+            <select id="form-m-lider" class="w-full px-3 py-2 input-flat text-sm"></select>
           </div>
         </div>
 
-        <!-- Cédula/RIF con variaciones y Correo con dominio desplegable + personalizado -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-blue-100 pt-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-200 pt-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Cédula o RIF</label>
-            <div class="flex gap-1.5">
-              <select id="form-m-cedula-tipo" class="w-24 px-2 py-2 input-clean text-xs font-semibold bg-slate-50">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Cédula o RIF</label>
+            <div class="flex">
+              <select id="form-m-cedula-tipo" class="w-20 px-2 py-2 input-flat border-r-0 text-xs font-mono font-semibold bg-slate-50">
                 <option value="V-">V-</option>
                 <option value="E-">E-</option>
                 <option value="J-">J-</option>
@@ -440,51 +560,51 @@
                 <option value="P-">P-</option>
                 <option value="C-">C-</option>
               </select>
-              <input id="form-m-cedula-num" type="text" placeholder="Ej. 12345678-9" class="flex-1 px-3 py-2 input-clean text-sm font-mono" />
+              <input id="form-m-cedula-num" type="text" placeholder="12345678" class="flex-1 px-3 py-2 input-flat text-sm font-mono" />
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico</label>
-            <div class="flex gap-1.5">
-              <input id="form-m-correo-user" type="text" placeholder="usuario" class="flex-1 px-3 py-2 input-clean text-sm" />
-              <select id="form-m-correo-domain" class="w-40 px-2 py-2 input-clean text-xs font-semibold bg-slate-50">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Correo Electrónico</label>
+            <div class="flex">
+              <input id="form-m-correo-user" type="text" placeholder="usuario" class="flex-1 px-3 py-2 input-flat border-r-0 text-sm" />
+              <select id="form-m-correo-domain" class="w-40 px-2 py-2 input-flat text-xs font-mono bg-slate-50">
                 <option value="@gmail.com">@gmail.com</option>
                 <option value="@hotmail.com">@hotmail.com</option>
                 <option value="@outlook.com">@outlook.com</option>
                 <option value="@yahoo.com">@yahoo.com</option>
-                <option value="custom">Personalizado...</option>
+                <option value="custom">Personalizado</option>
               </select>
             </div>
-            <input id="form-m-correo-custom" type="text" placeholder="@dominioempresa.com" class="hidden w-full mt-2 px-3 py-1.5 input-clean text-sm font-mono" />
+            <input id="form-m-correo-custom" type="text" placeholder="@dominioempresa.com" class="hidden w-full mt-2 px-3 py-1.5 input-flat text-sm font-mono" />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 border-t border-blue-100 pt-3">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 border-t border-slate-200 pt-4">
           <div>
-            <label class="block text-xs font-semibold text-navy mb-1">Fecha de Inicio *</label>
-            <input id="form-m-fechainicio" type="date" required class="w-full px-2.5 py-2 input-clean text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Fecha Inicio *</label>
+            <input id="form-m-fechainicio" type="date" required class="w-full px-2.5 py-2 input-flat text-xs font-mono" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-emerald-800 mb-1">Fecha Fin (Libera ejecutivo)</label>
-            <input id="form-m-fechafin" type="date" class="w-full px-2.5 py-2 border border-emerald-300 bg-emerald-50/50 rounded-lg text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-emerald-800 mb-1">Fecha Fin (Libera)</label>
+            <input id="form-m-fechafin" type="date" class="w-full px-2.5 py-2 border border-emerald-600 bg-emerald-50/30 text-xs font-mono" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha de Nacimiento</label>
-            <input id="form-m-fechanac" type="date" class="w-full px-2.5 py-2 input-clean text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Fecha Nac.</label>
+            <input id="form-m-fechanac" type="date" class="w-full px-2.5 py-2 input-flat text-xs font-mono" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha de Afiliación</label>
-            <input id="form-m-fechaafiliacion" type="date" class="w-full px-2.5 py-2 input-clean text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Fecha Afiliación</label>
+            <input id="form-m-fechaafiliacion" type="date" class="w-full px-2.5 py-2 input-flat text-xs font-mono" />
           </div>
         </div>
 
-        <div id="form-m-error" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+        <div id="form-m-error" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-blue-100">
-          <button type="button" id="btn-cancel-modal-maestro" class="px-4 py-2 rounded-lg btn-secondary text-xs font-semibold">Cancelar</button>
-          <button type="submit" id="btn-save-maestro" class="px-5 py-2 rounded-lg btn-primary text-xs font-semibold">
-            <span id="save-maestro-text">Guardar en Control de intermediarios</span>
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">
+          <button type="button" id="btn-cancel-modal-maestro" class="px-4 py-2 btn-outline text-xs font-semibold uppercase tracking-wider">Cancelar</button>
+          <button type="submit" id="btn-save-maestro" class="px-5 py-2 btn-dark text-xs font-semibold uppercase tracking-wider">
+            <span id="save-maestro-text">Guardar</span>
             <span id="save-maestro-loading" class="hidden">Guardando...</span>
           </button>
         </div>
@@ -493,30 +613,46 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 2: CONTROL DE RECLASIFICACIÓN                                   -->
+  <!-- MODAL B: CONTROL DE RECLASIFICACIÓN (ID OCULTO)                       -->
   <!-- ===================================================================== -->
-  <div id="modal-reclasificacion-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl border border-blue-100 max-w-2xl w-full p-6 max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-blue-100 pb-3 mb-4">
+  <div id="modal-reclasificacion-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 shadow-2xl max-w-2xl w-full p-6 max-h-[92vh] overflow-y-auto modal-panel">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
         <div>
-          <h3 id="modal-r-title" class="text-base font-bold text-navy">Registrar en Control de reclasificación</h3>
-          <p class="text-xs text-slate-500">Registra una reclasificación manteniendo la línea histórica.</p>
+          <h3 id="modal-r-title" class="text-sm font-bold uppercase tracking-wider text-slate-900">Registro de Reclasificación</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Gestión de Control de reclasificación.</p>
         </div>
-        <button type="button" id="btn-cerrar-modal-r" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-500 hover:bg-slate-100">Cerrar ✕</button>
+        <button type="button" id="btn-cerrar-modal-r" class="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-slate-900">✕</button>
       </div>
 
-      <form id="reclasificacion-form" class="space-y-3.5">
+      <form id="reclasificacion-form" class="space-y-4">
         <input type="hidden" id="form-r-modo" value="NEW_OR_RECLASSIFY" />
         <input type="hidden" id="form-r-edit-id" value="" />
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div id="r-quick-select-box" class="p-3 bg-slate-50 border border-slate-200">
+          <label for="form-r-existing-select" class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Operación</label>
+          <select id="form-r-existing-select" class="w-full px-3 py-2 text-xs input-flat">
+            <option value="__NEW__">+ Crear nuevo registro de reclasificación</option>
+          </select>
+        </div>
+
+        <div id="r-closure-box" class="hidden p-3.5 bg-emerald-50/60 border-l-4 border-emerald-700 space-y-2 text-xs">
+          <div class="font-bold text-emerald-950 uppercase tracking-wide">Cierre de vigencia del registro actual</div>
+          <div id="r-current-summary" class="text-emerald-900"></div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Código Intermediario *</label>
-            <input id="form-r-codigo" type="text" required placeholder="Ej. 10450" class="w-full px-3 py-2 input-clean text-sm font-mono uppercase" />
+            <label for="form-r-fecha-cierre-ant" class="block text-[11px] font-semibold text-emerald-950 mb-1">Fecha Fin para cerrar el registro saliente *</label>
+            <input id="form-r-fecha-cierre-ant" type="date" class="w-full sm:w-56 px-3 py-1.5 text-xs font-mono input-flat" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Código Intermediario *</label>
+            <input id="form-r-codigo" type="text" required placeholder="Ej. 10450" class="w-full px-3 py-2 input-flat text-sm font-mono uppercase" />
           </div>
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Estatus del Código *</label>
-            <select id="form-r-estatus" class="w-full px-3 py-2 input-clean text-sm font-semibold">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Estatus del Código *</label>
+            <select id="form-r-estatus" class="w-full px-3 py-2 input-flat text-sm font-semibold">
               <option value="ACTIVO">ACTIVO</option>
               <option value="INACTIVO">INACTIVO</option>
             </select>
@@ -524,57 +660,57 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre y Apellido del Intermediario (Corregido) *</label>
-          <input id="form-r-nombre" type="text" required class="w-full px-3 py-2 input-clean text-sm" />
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Nombre y Apellido del Intermediario (Corregido) *</label>
+          <input id="form-r-nombre" type="text" required placeholder="Nombre y apellido o razón social" class="w-full px-3 py-2 input-flat text-sm" />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del Tomador</label>
-            <input id="form-r-tomador" type="text" class="w-full px-3 py-2 input-clean text-sm" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Nombre del Tomador</label>
+            <input id="form-r-tomador" type="text" class="w-full px-3 py-2 input-flat text-sm" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del Asegurado</label>
-            <input id="form-r-asegurado" type="text" class="w-full px-3 py-2 input-clean text-sm" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Sucursal Reclasificada *</label>
-            <select id="form-r-sucursal" required class="w-full px-3 py-2 input-clean text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Ejecutivo Reclasificado *</label>
-            <select id="form-r-ejecutivo" required class="w-full px-3 py-2 input-clean text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Líder Reclasificado</label>
-            <select id="form-r-lider" class="w-full px-3 py-2 input-clean text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Canal Reclasificado</label>
-            <select id="form-r-canal" class="w-full px-3 py-2 input-clean text-sm"></select>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Nombre del Asegurado</label>
+            <input id="form-r-asegurado" type="text" class="w-full px-3 py-2 input-flat text-sm" />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha de Inicio *</label>
-            <input id="form-r-fechainicio" type="date" required class="w-full px-3 py-2 input-clean text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Sucursal Reclasificada *</label>
+            <select id="form-r-sucursal" required class="w-full px-3 py-2 input-flat text-sm"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha Fin (Vacío = Vigente)</label>
-            <input id="form-r-fechafin" type="date" class="w-full px-3 py-2 input-clean text-xs font-mono" />
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Ejecutivo Reclasificado *</label>
+            <select id="form-r-ejecutivo" required class="w-full px-3 py-2 input-flat text-sm"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Líder Reclasificado</label>
+            <select id="form-r-lider" class="w-full px-3 py-2 input-flat text-sm"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Canal Reclasificado</label>
+            <select id="form-r-canal" class="w-full px-3 py-2 input-flat text-sm"></select>
           </div>
         </div>
 
-        <div id="form-r-error" class="hidden p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Fecha de Inicio *</label>
+            <input id="form-r-fechainicio" type="date" required class="w-full px-3 py-2 input-flat text-xs font-mono" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">Fecha Fin (Vacío = Vigente)</label>
+            <input id="form-r-fechafin" type="date" class="w-full px-3 py-2 input-flat text-xs font-mono" />
+          </div>
+        </div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-blue-100">
-          <button type="button" id="btn-cancel-modal-r" class="px-4 py-2 rounded-lg btn-secondary text-xs font-semibold">Cancelar</button>
-          <button type="submit" class="px-5 py-2 rounded-lg btn-primary text-xs font-semibold">
-            <span id="save-r-text">Guardar reclasificación</span>
+        <div id="form-r-error" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">
+          <button type="button" id="btn-cancel-modal-r" class="px-4 py-2 btn-outline text-xs font-semibold uppercase tracking-wider">Cancelar</button>
+          <button type="submit" class="px-5 py-2 btn-dark text-xs font-semibold uppercase tracking-wider">
+            <span id="save-r-text">Guardar</span>
             <span id="save-r-loading" class="hidden">Guardando...</span>
           </button>
         </div>
@@ -582,51 +718,240 @@
     </div>
   </div>
 
+  <!-- ===================================================================== -->
+  <!-- MODAL C: HISTÓRICO DE UN CÓDIGO EN CONTROL DE RECLASIFICACIÓN         -->
+  <!-- ===================================================================== -->
+  <div id="history-reclasificacion-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 shadow-2xl max-w-5xl w-full modal-panel">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 id="history-r-title" class="text-sm font-bold uppercase tracking-wider text-slate-900">Histórico de Reclasificaciones</h3>
+          <p id="history-r-subtitle" class="text-xs text-slate-500 mt-0.5"></p>
+        </div>
+        <button type="button" id="btn-close-history-r" class="px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900">✕</button>
+      </div>
+
+      <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+        <div>
+          <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-2">
+            Periodos de Vigencia Registrados
+          </h4>
+          <div class="overflow-x-auto border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-800 font-semibold uppercase">
+                <tr>
+                  <th class="py-2.5 px-3">Estatus</th>
+                  <th class="py-2.5 px-3">Intermediario Corregido</th>
+                  <th class="py-2.5 px-3">Tomador / Asegurado</th>
+                  <th class="py-2.5 px-3">Sucursal</th>
+                  <th class="py-2.5 px-3">Ejecutivo</th>
+                  <th class="py-2.5 px-3">Líder / Canal</th>
+                  <th class="py-2.5 px-3">Vigencia</th>
+                  <th class="py-2.5 px-3">Registrado Por</th>
+                </tr>
+              </thead>
+              <tbody id="history-r-timeline-tbody" class="divide-y divide-slate-200"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-2">
+            Trazabilidad de Movimientos
+          </h4>
+          <div class="overflow-x-auto border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-800 font-semibold uppercase">
+                <tr>
+                  <th class="py-2.5 px-3">Fecha y Hora</th>
+                  <th class="py-2.5 px-3">Usuario</th>
+                  <th class="py-2.5 px-3">Operación</th>
+                  <th class="py-2.5 px-3">Anterior</th>
+                  <th class="py-2.5 px-3">Nuevo</th>
+                </tr>
+              </thead>
+              <tbody id="history-r-audit-tbody" class="divide-y divide-slate-200"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-3 border-t border-slate-200">
+          <button type="button" id="btn-reclassify-from-history" class="px-5 py-2 btn-dark text-xs font-semibold uppercase tracking-wider">
+            + Reclasificar este Código
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL D: HISTÓRICO POR CÓDIGO EN CONTROL DE INTERMEDIARIOS            -->
+  <!-- ===================================================================== -->
+  <div id="history-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 shadow-2xl max-w-4xl w-full modal-panel">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 id="history-m-title" class="text-sm font-bold uppercase tracking-wider text-slate-900">Histórico del Intermediario</h3>
+          <p id="history-m-subtitle" class="text-xs text-slate-500 mt-0.5"></p>
+        </div>
+        <button type="button" id="btn-close-history-m" class="px-3 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900">✕</button>
+      </div>
+      <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <div class="overflow-x-auto border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-800 font-semibold uppercase">
+              <tr>
+                <th class="py-2.5 px-3">Intermediario</th>
+                <th class="py-2.5 px-3">Código</th>
+                <th class="py-2.5 px-3">Ejecutivo</th>
+                <th class="py-2.5 px-3">Sucursal / Líder</th>
+                <th class="py-2.5 px-3">Fecha Inicio → Fecha Fin</th>
+                <th class="py-2.5 px-3">Condición</th>
+              </tr>
+            </thead>
+            <tbody id="history-m-tbody" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================================================================
-    // CONFIGURACIÓN DE CONEXIÓN A GOOGLE APPS SCRIPT
+    // CONFIGURACIÓN DE CONEXIÓN A LA API
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG/exec";
-    const CACHE_KEY = "ci_sistema_cache_v2";
-    const USER_KEY = "ci_usuario_sesion_v2";
+    const CACHE_KEY = "ci_sistema_cache_v4";
+    const USER_KEY = "ci_usuario_sesion_v4";
 
     const state = {
       currentUser: null,
       maestro: [],
       historicoMaestro: [],
       historial: [],
+      bitacora: [],
       sucursales: [],
       ejecutivos: [],
       lideres: [],
       canales: [],
-      editingMaestroOriginal: null
+      editingMaestroOriginal: null,
+      selectedHistoryRCodigo: ''
     };
 
     let dtMaestro = null;
     let dtHistoricoMaestro = null;
     let dtReclasificacion = null;
+    let swalConfirmCallback = null;
 
-    const dtLang = {
-      search: "Buscar:",
-      lengthMenu: "Mostrar _MENU_",
-      info: "Mostrando _START_ a _END_ de _TOTAL_",
-      infoEmpty: "0 registros",
-      infoFiltered: "(filtrado de _MAX_)",
-      zeroRecords: "No se encontraron registros",
-      paginate: { first: "«", previous: "‹", next: "›", last: "»" }
+    // Configuración DataTables sin scrollX interno para evitar doble encabezado roto
+    const dtConfigBase = {
+      deferRender: true,
+      pageLength: 25,
+      lengthMenu: [15, 25, 50, 100],
+      autoWidth: false,
+      dom: '<"dt-top-bar"lf><"dt-table-scroll"t><"dt-bottom-bar"ip>',
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_",
+        info: "Mostrando _START_ a _END_ de _TOTAL_",
+        infoEmpty: "0 registros",
+        infoFiltered: "(filtrado de _MAX_)",
+        zeroRecords: "No se encontraron registros",
+        paginate: { first: "«", previous: "‹", next: "›", last: "»" }
+      }
     };
 
-    // Alertas en tonos verdes para éxito y rojo para alertas de bloqueo
+    // Alertas elegantes en verde esmeralda (éxito) o rojo sobrio (error)
     function showToast(message, isError = false) {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      toast.className = `pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-white text-xs font-semibold flex items-center justify-between gap-3 ${
-        isError ? 'bg-red-600' : 'bg-emerald-600'
-      }`;
-      toast.innerHTML = `<span>${message}</span><button type="button" class="opacity-80 hover:opacity-100">✕</button>`;
+      toast.className = `pointer-events-auto px-4 py-3 bg-white border border-slate-300 border-l-4 ${
+        isError ? 'border-l-red-700' : 'border-l-emerald-700'
+      } shadow-lg text-xs font-medium text-slate-900 flex items-center justify-between gap-3 toast-item`;
+      toast.innerHTML = `<span>${message}</span><button type="button" class="text-slate-400 hover:text-slate-900 font-bold">✕</button>`;
       toast.querySelector('button').onclick = () => toast.remove();
       container.appendChild(toast);
-      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3800);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+    }
+
+    function showConfirm(title, text, onConfirm) {
+      document.getElementById('swal-title').textContent = title;
+      document.getElementById('swal-text').textContent = text;
+      swalConfirmCallback = onConfirm;
+      document.getElementById('swal-overlay').classList.remove('hidden');
+    }
+
+    // Limpia en el cliente cualquier fecha larga residual ("Sat Jan 01 2022...") a "2022-01-01"
+    function limpiarFechaUI(val) {
+      if (!val) return '';
+      const s = String(val).trim();
+      if (!s || s === '-') return '';
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+      if (s.includes('GMT') || /^[A-Z][a-z]{2}\s[A-Z][a-z]{2}\s\d{2}\s\d{4}/.test(s)) {
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        }
+      }
+      return s;
+    }
+
+    function restarUnDia(fechaISO) {
+      if (!fechaISO) return '';
+      const p = fechaISO.split('-').map(Number);
+      if (p.length !== 3) return '';
+      const dt = new Date(Date.UTC(p[0], p[1] - 1, p[2], 12, 0, 0));
+      dt.setUTCDate(dt.getUTCDate() - 1);
+      return dt.toISOString().slice(0, 10);
+    }
+
+    // Repara automáticamente en el navegador si el backend viejo devolvió el histórico corrido 1 columna
+    function normalizarItemHistorico(r) {
+      const codLooksLikeName = isNaN(Number(r.cod)) && r.cod && r.cod.length > 5 && !isNaN(Number(r.intermediario));
+      if (codLooksLikeName) {
+        return {
+          intermediario: r.id || '',
+          cod: r.intermediario || '',
+          ejecutivo: r.cod || '',
+          fechaInicio: limpiarFechaUI(r.ejecutivo),
+          fechaFin: limpiarFechaUI(r.fechaInicio),
+          sucursal: r.fechaFin || '',
+          lider: r.sucursal || '',
+          activo: r.lider || 'SI',
+          cedula: r.activo || '',
+          correo: r.cedula || '',
+          fechaNac: limpiarFechaUI(r.correo),
+          fechaAfiliacion: limpiarFechaUI(r.fechaNac)
+        };
+      }
+      return {
+        intermediario: r.intermediario || '',
+        cod: r.cod || '',
+        ejecutivo: r.ejecutivo || '',
+        fechaInicio: limpiarFechaUI(r.fechaInicio),
+        fechaFin: limpiarFechaUI(r.fechaFin),
+        sucursal: r.sucursal || '',
+        lider: r.lider || '',
+        activo: r.activo || 'SI',
+        cedula: r.cedula || '',
+        correo: r.correo || '',
+        fechaNac: limpiarFechaUI(r.fechaNac),
+        fechaAfiliacion: limpiarFechaUI(r.fechaAfiliacion)
+      };
+    }
+
+    function obtenerVigenteReclasificacionPorCodigo(codigo) {
+      const clean = String(codigo || '').trim().toUpperCase();
+      for (let i = 0; i < state.historial.length; i++) {
+        const r = state.historial[i];
+        if (String(r.codigo || '').toUpperCase() === clean && (!r.fechaFin || r.fechaFin === '')) {
+          return r;
+        }
+      }
+      return null;
     }
 
     async function apiCall(action, payload = {}) {
@@ -636,662 +961,4 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action, payload })
       });
-      if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
-      return await response.json();
-    }
-
-    function aplicarDatosAlEstado(res) {
-      state.maestro = Array.isArray(res.maestro) ? res.maestro : [];
-      state.historicoMaestro = Array.isArray(res.historicoMaestro) ? res.historicoMaestro : [];
-      state.historial = Array.isArray(res.historial) ? res.historial : [];
-      state.sucursales = Array.isArray(res.sucursales) ? res.sucursales : [];
-      state.ejecutivos = Array.isArray(res.ejecutivos) ? res.ejecutivos : [];
-      state.lideres = Array.isArray(res.lideres) ? res.lideres : [];
-      state.canales = Array.isArray(res.canales) ? res.canales : [];
-
-      try {
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
-          maestro: state.maestro,
-          historicoMaestro: state.historicoMaestro,
-          historial: state.historial,
-          sucursales: state.sucursales,
-          ejecutivos: state.ejecutivos,
-          lideres: state.lideres,
-          canales: state.canales
-        }));
-      } catch (e) {}
-
-      poblarSelectores();
-      renderizarTodo();
-    }
-
-    function poblarSelectores() {
-      const llenar = (id, items, placeholder, keepAll = false) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const prev = el.value;
-        el.innerHTML = '';
-        const opt0 = document.createElement('option');
-        opt0.value = keepAll ? 'ALL' : '';
-        opt0.textContent = placeholder;
-        el.appendChild(opt0);
-        items.forEach(val => {
-          const o = document.createElement('option');
-          o.value = val;
-          o.textContent = val;
-          el.appendChild(o);
-        });
-        if (prev && (items.includes(prev) || prev === 'ALL')) el.value = prev;
-      };
-
-      // Filtros de vistas
-      llenar('filter-m-sucursal', state.sucursales, 'Sucursal: Todas', true);
-      llenar('filter-m-ejecutivo', state.ejecutivos, 'Ejecutivo: Todos', true);
-      llenar('filter-r-sucursal', state.sucursales, 'Sucursal: Todas', true);
-      llenar('filter-r-ejecutivo', state.ejecutivos, 'Ejecutivo: Todos', true);
-
-      // Selectores de Modales conectados a Hoja Control
-      llenar('form-m-ejecutivo', state.ejecutivos, 'Seleccionar ejecutivo...');
-      llenar('form-m-sucursal', state.sucursales, 'Seleccionar sucursal...');
-      llenar('form-m-lider', state.lideres, 'Sin líder / Seleccionar...');
-
-      llenar('form-r-sucursal', state.sucursales, 'Seleccionar sucursal...');
-      llenar('form-r-ejecutivo', state.ejecutivos, 'Seleccionar ejecutivo...');
-      llenar('form-r-lider', state.lideres, 'Seleccionar líder...');
-      llenar('form-r-canal', state.canales, 'Seleccionar canal...');
-    }
-
-    // =========================================================================
-    // RENDERIZADO ULTRARRÁPIDO POR ARREGLOS EN DATATABLES
-    // =========================================================================
-    function renderizarTodo() {
-      document.getElementById('badge-maestro').textContent = state.maestro.length;
-      document.getElementById('badge-historico-maestro').textContent = state.historicoMaestro.length;
-      document.getElementById('badge-reclasificacion').textContent = state.historial.length;
-
-      renderTablaMaestro();
-      renderTablaHistoricoMaestro();
-      renderTablaReclasificacion();
-    }
-
-    function renderTablaMaestro() {
-      const fSuc = document.getElementById('filter-m-sucursal').value;
-      const fEje = document.getElementById('filter-m-ejecutivo').value;
-      const fAct = document.getElementById('filter-m-activo').value;
-
-      const filtrados = state.maestro.filter(r => {
-        if (fSuc !== 'ALL' && r.sucursal !== fSuc) return false;
-        if (fEje !== 'ALL' && r.ejecutivo !== fEje) return false;
-        if (fAct !== 'ALL' && r.activo !== fAct) return false;
-        return true;
-      });
-
-      const dataRows = filtrados.map(r => {
-        const liberado = r.fechaFin && r.fechaFin !== '';
-        const badgeActivo = `<button type="button" class="btn-toggle-m-activo px-2 py-0.5 rounded text-[11px] font-bold border ${
-          r.activo === 'SI'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-            : 'bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200'
-        }" data-cod="${r.cod}" data-act="${r.activo}">${r.activo}</button>`;
-
-        const fechaFinHtml = liberado
-          ? `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-mono text-[11px] font-semibold border border-emerald-200" title="Ejecutivo liberado">${r.fechaFin}</span>`
-          : `<span class="text-slate-400 text-[11px]">Vigente (Sin fecha fin)</span>`;
-
-        const acciones = `<button type="button" class="btn-edit-maestro px-2.5 py-1 rounded btn-secondary text-xs font-semibold" data-cod="${r.cod}">Editar / Asignar</button>`;
-
-        return [
-          `<span class="font-mono text-slate-500">${r.id || '—'}</span>`,
-          `<span class="font-semibold text-navy">${r.intermediario || '—'}</span>`,
-          `<span class="font-mono font-bold">${r.cod || '—'}</span>`,
-          `<span class="font-medium">${r.ejecutivo || '—'}</span>`,
-          `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
-          fechaFinHtml,
-          r.sucursal || '—',
-          r.lider || '—',
-          badgeActivo,
-          `<span class="font-mono">${r.cedula || '—'}</span>`,
-          r.correo || '—',
-          `<span class="font-mono text-[11px]">${r.fechaNac || '—'}</span>`,
-          `<span class="font-mono text-[11px]">${r.fechaAfiliacion || '—'}</span>`,
-          `<div class="text-right">${acciones}</div>`
-        ];
-      });
-
-      if (dtMaestro) {
-        dtMaestro.clear().rows.add(dataRows).draw(false);
-      } else {
-        dtMaestro = $('#table-dt-maestro').DataTable({
-          data: dataRows,
-          deferRender: true,
-          pageLength: 25,
-          lengthMenu: [15, 25, 50, 100],
-          scrollX: true,
-          language: dtLang
-        });
-      }
-    }
-
-    function renderTablaHistoricoMaestro() {
-      const dataRows = state.historicoMaestro.map(r => [
-        `<span class="font-mono font-semibold text-navy">${r.idHistorico || '—'}</span>`,
-        `<span class="font-mono text-slate-500">${r.id || '—'}</span>`,
-        `<span class="font-medium">${r.intermediario || '—'}</span>`,
-        `<span class="font-mono font-bold">${r.cod || '—'}</span>`,
-        `<span class="font-semibold text-slate-800">${r.ejecutivo || '—'}</span>`,
-        `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
-        `<span class="px-2 py-0.5 rounded bg-blue-50 text-navy font-mono text-[11px] font-semibold">${r.fechaFin || '—'}</span>`,
-        r.sucursal || '—',
-        r.lider || '—',
-        r.activo || '—',
-        `<span class="font-mono">${r.cedula || '—'}</span>`,
-        r.correo || '—',
-        `<span class="font-mono text-[11px]">${r.fechaNac || '—'}</span>`,
-        `<span class="font-mono text-[11px]">${r.fechaAfiliacion || '—'}</span>`
-      ]);
-
-      if (dtHistoricoMaestro) {
-        dtHistoricoMaestro.clear().rows.add(dataRows).draw(false);
-      } else {
-        dtHistoricoMaestro = $('#table-dt-historico-maestro').DataTable({
-          data: dataRows,
-          deferRender: true,
-          pageLength: 25,
-          scrollX: true,
-          order: [[0, 'desc']],
-          language: dtLang
-        });
-      }
-    }
-
-    function renderTablaReclasificacion() {
-      const fSuc = document.getElementById('filter-r-sucursal').value;
-      const fEje = document.getElementById('filter-r-ejecutivo').value;
-      const fVig = document.getElementById('filter-r-vigencia').value;
-
-      const filtrados = state.historial.filter(r => {
-        const vigente = !r.fechaFin || r.fechaFin === '';
-        if (fSuc !== 'ALL' && r.sucursal !== fSuc) return false;
-        if (fEje !== 'ALL' && r.ejecutivo !== fEje) return false;
-        if (fVig === 'OPEN' && !vigente) return false;
-        if (fVig === 'CLOSED' && vigente) return false;
-        return true;
-      });
-
-      const dataRows = filtrados.map(r => {
-        const vigente = !r.fechaFin || r.fechaFin === '';
-        const estBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold border ${
-          r.estatus === 'ACTIVO'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            : 'bg-slate-100 text-slate-500 border-slate-200'
-        }">${r.estatus}</span>`;
-
-        const acciones = `<div class="flex justify-end gap-1.5">
-          <button type="button" class="btn-reclasificar-row px-2.5 py-1 rounded btn-primary text-xs font-medium" data-cod="${r.codigo}">Reclasificar</button>
-          <button type="button" class="btn-editar-r-row px-2.5 py-1 rounded btn-secondary text-xs font-medium" data-id="${r.idUnico}">Editar</button>
-        </div>`;
-
-        return [
-          `<span class="font-mono text-slate-500">${r.idUnico || '—'}</span>`,
-          `<span class="font-mono font-bold">${r.codigo || '—'}</span>`,
-          estBadge,
-          `<span class="font-semibold text-navy">${r.nombreIntermediario || '—'}</span>`,
-          r.nombreTomador || '—',
-          r.nombreAsegurado || '—',
-          r.sucursal || '—',
-          `<span class="font-medium">${r.ejecutivo || '—'}</span>`,
-          r.lider || '—',
-          r.canal || '—',
-          `<span class="font-mono text-[11px]">${r.fechaInicio || '—'}</span>`,
-          vigente ? `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-semibold text-[11px]">Vigente</span>` : `<span class="font-mono text-[11px]">${r.fechaFin}</span>`,
-          r.registradoPor || '—',
-          `<span class="font-mono text-[11px] text-slate-500">${r.fechaHoraOperacion || '—'}</span>`,
-          acciones
-        ];
-      });
-
-      if (dtReclasificacion) {
-        dtReclasificacion.clear().rows.add(dataRows).draw(false);
-      } else {
-        dtReclasificacion = $('#table-dt-reclasificacion').DataTable({
-          data: dataRows,
-          deferRender: true,
-          pageLength: 25,
-          scrollX: true,
-          language: dtLang
-        });
-      }
-    }
-
-    async function sincronizarSegundoPlano(mostrarToast = false) {
-      const ind = document.getElementById('sync-indicator');
-      ind.classList.remove('hidden');
-      try {
-        const res = await apiCall('obtenerDatosSistema');
-        if (res && res.exito) {
-          aplicarDatosAlEstado(res);
-          if (mostrarToast) showToast('Datos sincronizados correctamente.');
-        }
-      } catch (e) {
-        if (mostrarToast) showToast(e.message, true);
-      } finally {
-        ind.classList.add('hidden');
-      }
-    }
-
-    // =========================================================================
-    // FUNCIONES DEL MODAL DE CONTROL DE INTERMEDIARIOS
-    // =========================================================================
-    function abrirModalMaestro(reg = null) {
-      const form = document.getElementById('maestro-form');
-      form.reset();
-      document.getElementById('form-m-error').classList.add('hidden');
-      document.getElementById('form-m-correo-custom').classList.add('hidden');
-      const aviso = document.getElementById('aviso-bloqueo-ejecutivo');
-      const selectEjecutivo = document.getElementById('form-m-ejecutivo');
-
-      const hoy = new Date().toISOString().slice(0, 10);
-
-      if (!reg) {
-        state.editingMaestroOriginal = null;
-        document.getElementById('modal-maestro-title').textContent = 'Nuevo intermediario';
-        document.getElementById('form-m-id').value = 'Automático';
-        document.getElementById('form-m-cod').readOnly = false;
-        document.getElementById('form-m-activo').value = 'SI';
-        document.getElementById('form-m-fechainicio').value = hoy;
-        selectEjecutivo.disabled = false;
-        aviso.classList.add('hidden');
-      } else {
-        state.editingMaestroOriginal = reg;
-        document.getElementById('modal-maestro-title').textContent = `Editar intermediario (${reg.cod})`;
-        document.getElementById('form-m-id').value = reg.id || '';
-        document.getElementById('form-m-cod').value = reg.cod || '';
-        document.getElementById('form-m-activo').value = reg.activo || 'SI';
-        document.getElementById('form-m-intermediario').value = reg.intermediario || '';
-        
-        // Asegurar que valores actuales existan en el select aunque no estén en Control
-        ['ejecutivo', 'sucursal', 'lider'].forEach(campo => {
-          const val = reg[campo] || '';
-          const sel = document.getElementById(`form-m-${campo}`);
-          if (val && !Array.from(sel.options).some(o => o.value === val)) {
-            sel.appendChild(new Option(val, val));
-          }
-          sel.value = val;
-        });
-
-        document.getElementById('form-m-fechainicio').value = reg.fechaInicio || '';
-        document.getElementById('form-m-fechafin').value = reg.fechaFin || '';
-        document.getElementById('form-m-fechanac').value = reg.fechaNac || '';
-        document.getElementById('form-m-fechaafiliacion').value = reg.fechaAfiliacion || '';
-
-        // Desarmar Cédula/RIF
-        if (reg.cedula) {
-          const m = reg.cedula.match(/^(V-|E-|J-|G-|P-|C-)(.*)$/i);
-          if (m) {
-            document.getElementById('form-m-cedula-tipo').value = m[1].toUpperCase();
-            document.getElementById('form-m-cedula-num').value = m[2];
-          } else {
-            document.getElementById('form-m-cedula-num').value = reg.cedula;
-          }
-        }
-
-        // Desarmar Correo
-        if (reg.correo && reg.correo.includes('@')) {
-          const idx = reg.correo.indexOf('@');
-          const userPart = reg.correo.slice(0, idx);
-          const domPart = reg.correo.slice(idx);
-          document.getElementById('form-m-correo-user').value = userPart;
-          const domSel = document.getElementById('form-m-correo-domain');
-          if (Array.from(domSel.options).some(o => o.value === domPart)) {
-            domSel.value = domPart;
-          } else {
-            domSel.value = 'custom';
-            const customInp = document.getElementById('form-m-correo-custom');
-            customInp.value = domPart;
-            customInp.classList.remove('hidden');
-          }
-        } else {
-          document.getElementById('form-m-correo-user').value = reg.correo || '';
-        }
-
-        // Regla visual de Fecha Fin para cambio de ejecutivo
-        const tieneFechaFinGuardada = Boolean(reg.fechaFin && reg.fechaFin.trim() !== '');
-        aviso.classList.remove('hidden');
-        if (!tieneFechaFinGuardada && reg.ejecutivo) {
-          aviso.innerHTML = `<strong>Ejecutivo actual activo (${reg.ejecutivo}):</strong> Si deseas asignar otro ejecutivo a este intermediario, primero debes asignarle una <strong>Fecha Fin</strong> y guardar los cambios para liberar el registro.`;
-        } else {
-          aviso.innerHTML = `<strong>Intermediario liberado (Fecha Fin: ${reg.fechaFin || 'N/A'}):</strong> Ya puedes seleccionar un nuevo ejecutivo. Al guardar, el registro de <strong>${reg.ejecutivo}</strong> pasará automáticamente a <em>Histórico de control de intermediarios</em>.`;
-        }
-      }
-
-      document.getElementById('modal-maestro-overlay').classList.remove('hidden');
-    }
-
-    // =========================================================================
-    // INICIALIZACIÓN DE EVENTOS
-    // =========================================================================
-    document.addEventListener('DOMContentLoaded', () => {
-      
-      // Restaurar sesión instantáneamente si ya inició sesión
-      const cachedUser = sessionStorage.getItem(USER_KEY);
-      const cachedData = sessionStorage.getItem(CACHE_KEY);
-      if (cachedUser && cachedData) {
-        try {
-          state.currentUser = JSON.parse(cachedUser);
-          document.getElementById('header-user-name').textContent = state.currentUser.nombre;
-          document.getElementById('header-user-role').textContent = state.currentUser.rol;
-          document.getElementById('login-screen').classList.add('hidden');
-          document.getElementById('app-screen').classList.remove('hidden');
-          aplicarDatosAlEstado(JSON.parse(cachedData));
-          sincronizarSegundoPlano(false);
-        } catch (e) {}
-      }
-
-      // Mostrar/ocultar contraseña
-      document.getElementById('btn-toggle-pass').addEventListener('click', () => {
-        const inp = document.getElementById('login-password');
-        inp.type = inp.type === 'password' ? 'text' : 'password';
-      });
-
-      // Inicio de sesión + Carga en 1 solo viaje
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const errBox = document.getElementById('login-error-box');
-        errBox.classList.add('hidden');
-        document.getElementById('login-btn-text').classList.add('hidden');
-        document.getElementById('login-loading').classList.remove('hidden');
-
-        try {
-          const res = await apiCall('loginAndSync', {
-            username: document.getElementById('login-username').value.trim(),
-            password: document.getElementById('login-password').value.trim()
-          });
-
-          if (res && res.exito) {
-            state.currentUser = res.usuario;
-            sessionStorage.setItem(USER_KEY, JSON.stringify(res.usuario));
-            document.getElementById('header-user-name').textContent = res.usuario.nombre;
-            document.getElementById('header-user-role').textContent = res.usuario.rol;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            aplicarDatosAlEstado(res);
-            showToast('Sesión iniciada correctamente.');
-          } else {
-            errBox.textContent = (res && res.mensaje) || 'Credenciales incorrectas.';
-            errBox.classList.remove('hidden');
-          }
-        } catch (err) {
-          errBox.textContent = err.message;
-          errBox.classList.remove('hidden');
-        } finally {
-          document.getElementById('login-btn-text').classList.remove('hidden');
-          document.getElementById('login-loading').classList.add('hidden');
-        }
-      });
-
-      // Cerrar sesión
-      document.getElementById('btn-logout').addEventListener('click', () => {
-        sessionStorage.removeItem(USER_KEY);
-        sessionStorage.removeItem(CACHE_KEY);
-        state.currentUser = null;
-        document.getElementById('app-screen').classList.add('hidden');
-        document.getElementById('login-screen').classList.remove('hidden');
-      });
-
-      // Cambio entre las 3 Pestañas
-      const tabSections = ['tab-maestro', 'tab-historico-maestro', 'tab-reclasificacion'];
-      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.getAttribute('data-tab');
-          document.querySelectorAll('.nav-tab-btn').forEach(b => {
-            const activo = b.getAttribute('data-tab') === target;
-            b.className = activo
-              ? 'nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-navy transition flex items-center gap-2'
-              : 'nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-blue-100 hover:bg-white/10 transition flex items-center gap-2';
-          });
-          tabSections.forEach(sec => {
-            document.getElementById(sec).classList.toggle('hidden', sec !== target);
-          });
-          if (target === 'tab-maestro' && dtMaestro) dtMaestro.columns.adjust();
-          if (target === 'tab-historico-maestro' && dtHistoricoMaestro) dtHistoricoMaestro.columns.adjust();
-          if (target === 'tab-reclasificacion' && dtReclasificacion) dtReclasificacion.columns.adjust();
-        });
-      });
-
-      // Botones Sincronizar
-      document.querySelectorAll('.btn-sync-now').forEach(b => {
-        b.addEventListener('click', () => sincronizarSegundoPlano(true));
-      });
-
-      // Filtros de Control de intermediarios
-      ['filter-m-sucursal', 'filter-m-ejecutivo', 'filter-m-activo'].forEach(id => {
-        document.getElementById(id).addEventListener('change', renderTablaMaestro);
-      });
-      document.getElementById('btn-clear-m-filters').addEventListener('click', () => {
-        document.getElementById('filter-m-sucursal').value = 'ALL';
-        document.getElementById('filter-m-ejecutivo').value = 'ALL';
-        document.getElementById('filter-m-activo').value = 'ALL';
-        renderTablaMaestro();
-      });
-
-      // Filtros de Control de reclasificación
-      ['filter-r-sucursal', 'filter-r-ejecutivo', 'filter-r-vigencia'].forEach(id => {
-        document.getElementById(id).addEventListener('change', renderTablaReclasificacion);
-      });
-
-      // Selector de correo personalizado
-      document.getElementById('form-m-correo-domain').addEventListener('change', (e) => {
-        const customInp = document.getElementById('form-m-correo-custom');
-        if (e.target.value === 'custom') {
-          customInp.classList.remove('hidden');
-          customInp.focus();
-        } else {
-          customInp.classList.add('hidden');
-        }
-      });
-
-      // Abrir y cerrar modal de Control de intermediarios
-      document.getElementById('btn-nuevo-maestro').addEventListener('click', () => abrirModalMaestro(null));
-      const cerrarModalM = () => document.getElementById('modal-maestro-overlay').classList.add('hidden');
-      document.getElementById('btn-cerrar-modal-maestro').addEventListener('click', cerrarModalM);
-      document.getElementById('btn-cancel-modal-maestro').addEventListener('click', cerrarModalM);
-
-      // Eventos delegados en la tabla Control de intermediarios
-      $('#table-dt-maestro tbody').on('click', '.btn-edit-maestro', function () {
-        const cod = String($(this).data('cod'));
-        const reg = state.maestro.find(x => String(x.cod) === cod);
-        if (reg) abrirModalMaestro(reg);
-      }).on('click', '.btn-toggle-m-activo', async function () {
-        const cod = String($(this).data('cod'));
-        const act = String($(this).data('act'));
-        const nuevo = act === 'SI' ? 'NO' : 'SI';
-        try {
-          const res = await apiCall('cambiarEstatusIntermediarioMaestro', {
-            cod: cod,
-            nuevoEstatus: nuevo,
-            usuario: state.currentUser?.username || 'Sistema',
-            rol: state.currentUser?.rol || 'Operadora'
-          });
-          if (res && res.exito) {
-            aplicarDatosAlEstado(res);
-            showToast(res.mensaje || 'Estatus actualizado.');
-          }
-        } catch (err) {
-          showToast(err.message, true);
-        }
-      });
-
-      // Guardar en Control de intermediarios
-      document.getElementById('maestro-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const errBox = document.getElementById('form-m-error');
-        errBox.classList.add('hidden');
-
-        const orig = state.editingMaestroOriginal;
-        const nuevoEjecutivo = document.getElementById('form-m-ejecutivo').value.trim();
-
-        // Validación preventiva en cliente antes de enviar al servidor
-        if (orig && orig.ejecutivo && orig.ejecutivo !== nuevoEjecutivo && (!orig.fechaFin || orig.fechaFin === '')) {
-          errBox.textContent = `No puedes asignar a "${nuevoEjecutivo}" porque el ejecutivo actual "${orig.ejecutivo}" aún no tiene Fecha Fin guardada. Primero mantén a "${orig.ejecutivo}", colócale su Fecha Fin, guarda y luego podrás cambiar el ejecutivo.`;
-          errBox.classList.remove('hidden');
-          return;
-        }
-
-        const cedTipo = document.getElementById('form-m-cedula-tipo').value;
-        const cedNum = document.getElementById('form-m-cedula-num').value.trim();
-        const correoUser = document.getElementById('form-m-correo-user').value.trim();
-        const correoDom = document.getElementById('form-m-correo-domain').value;
-        let domFinal = correoDom;
-        if (correoDom === 'custom') {
-          domFinal = document.getElementById('form-m-correo-custom').value.trim();
-          if (domFinal && !domFinal.startsWith('@')) domFinal = '@' + domFinal;
-        }
-
-        const idVal = document.getElementById('form-m-id').value;
-        const payload = {
-          id: idVal === 'Automático' ? '' : idVal,
-          cod: document.getElementById('form-m-cod').value.trim().toUpperCase(),
-          intermediario: document.getElementById('form-m-intermediario').value.trim(),
-          ejecutivo: nuevoEjecutivo,
-          sucursal: document.getElementById('form-m-sucursal').value.trim(),
-          lider: document.getElementById('form-m-lider').value.trim(),
-          activo: document.getElementById('form-m-activo').value,
-          cedula: cedNum ? (cedTipo + cedNum) : '',
-          correo: correoUser ? (correoUser + domFinal) : '',
-          fechaInicio: document.getElementById('form-m-fechainicio').value,
-          fechaFin: document.getElementById('form-m-fechafin').value,
-          fechaNac: document.getElementById('form-m-fechanac').value,
-          fechaAfiliacion: document.getElementById('form-m-fechaafiliacion').value,
-          usuario: state.currentUser?.username || 'Sistema',
-          rol: state.currentUser?.rol || 'Operadora'
-        };
-
-        document.getElementById('save-maestro-text').classList.add('hidden');
-        document.getElementById('save-maestro-loading').classList.remove('hidden');
-
-        try {
-          const res = await apiCall('guardarIntermediarioMaestro', payload);
-          if (res && res.exito) {
-            aplicarDatosAlEstado(res);
-            cerrarModalM();
-            showToast(res.mensaje || 'Intermediario guardado correctamente.');
-          } else {
-            errBox.textContent = (res && res.mensaje) || 'Error al guardar.';
-            errBox.classList.remove('hidden');
-          }
-        } catch (err) {
-          errBox.textContent = err.message;
-          errBox.classList.remove('hidden');
-        } finally {
-          document.getElementById('save-maestro-text').classList.remove('hidden');
-          document.getElementById('save-maestro-loading').classList.add('hidden');
-        }
-      });
-
-      // Modal Control de reclasificación
-      const cerrarModalR = () => document.getElementById('modal-reclasificacion-overlay').classList.add('hidden');
-      document.getElementById('btn-cerrar-modal-r').addEventListener('click', cerrarModalR);
-      document.getElementById('btn-cancel-modal-r').addEventListener('click', cerrarModalR);
-
-      document.getElementById('btn-nueva-reclasificacion').addEventListener('click', () => {
-        document.getElementById('reclasificacion-form').reset();
-        document.getElementById('form-r-modo').value = 'NEW_OR_RECLASSIFY';
-        document.getElementById('form-r-edit-id').value = '';
-        document.getElementById('modal-r-title').textContent = 'Nueva reclasificación';
-        document.getElementById('form-r-fechainicio').value = new Date().toISOString().slice(0, 10);
-        document.getElementById('form-r-error').classList.add('hidden');
-        document.getElementById('modal-reclasificacion-overlay').classList.remove('hidden');
-      });
-
-      $('#table-dt-reclasificacion tbody').on('click', '.btn-reclasificar-row', function () {
-        const cod = String($(this).data('cod'));
-        const reg = state.historial.find(x => String(x.codigo) === cod);
-        document.getElementById('reclasificacion-form').reset();
-        document.getElementById('form-r-modo').value = 'NEW_OR_RECLASSIFY';
-        document.getElementById('form-r-edit-id').value = '';
-        document.getElementById('modal-r-title').textContent = `Reclasificar código ${cod}`;
-        if (reg) {
-          document.getElementById('form-r-codigo').value = reg.codigo;
-          document.getElementById('form-r-estatus').value = reg.estatus || 'ACTIVO';
-          document.getElementById('form-r-nombre').value = reg.nombreIntermediario || '';
-          document.getElementById('form-r-tomador').value = reg.nombreTomador || '';
-          document.getElementById('form-r-asegurado').value = reg.nombreAsegurado || '';
-          document.getElementById('form-r-sucursal').value = reg.sucursal || '';
-          document.getElementById('form-r-ejecutivo').value = reg.ejecutivo || '';
-          document.getElementById('form-r-lider').value = reg.lider || '';
-          document.getElementById('form-r-canal').value = reg.canal || '';
-        }
-        document.getElementById('form-r-fechainicio').value = new Date().toISOString().slice(0, 10);
-        document.getElementById('form-r-fechafin').value = '';
-        document.getElementById('form-r-error').classList.add('hidden');
-        document.getElementById('modal-reclasificacion-overlay').classList.remove('hidden');
-      }).on('click', '.btn-editar-r-row', function () {
-        const id = String($(this).data('id'));
-        const reg = state.historial.find(x => String(x.idUnico) === id);
-        if (!reg) return;
-        document.getElementById('reclasificacion-form').reset();
-        document.getElementById('form-r-modo').value = 'EDIT_ROW';
-        document.getElementById('form-r-edit-id').value = reg.idUnico;
-        document.getElementById('modal-r-title').textContent = `Editar registro ${reg.idUnico}`;
-        document.getElementById('form-r-codigo').value = reg.codigo;
-        document.getElementById('form-r-estatus').value = reg.estatus || 'ACTIVO';
-        document.getElementById('form-r-nombre').value = reg.nombreIntermediario || '';
-        document.getElementById('form-r-tomador').value = reg.nombreTomador || '';
-        document.getElementById('form-r-asegurado').value = reg.nombreAsegurado || '';
-        document.getElementById('form-r-sucursal').value = reg.sucursal || '';
-        document.getElementById('form-r-ejecutivo').value = reg.ejecutivo || '';
-        document.getElementById('form-r-lider').value = reg.lider || '';
-        document.getElementById('form-r-canal').value = reg.canal || '';
-        document.getElementById('form-r-fechainicio').value = reg.fechaInicio || '';
-        document.getElementById('form-r-fechafin').value = reg.fechaFin || '';
-        document.getElementById('form-r-error').classList.add('hidden');
-        document.getElementById('modal-reclasificacion-overlay').classList.remove('hidden');
-      });
-
-      // Guardar en Control de reclasificación
-      document.getElementById('reclasificacion-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const errBox = document.getElementById('form-r-error');
-        errBox.classList.add('hidden');
-        document.getElementById('save-r-text').classList.add('hidden');
-        document.getElementById('save-r-loading').classList.remove('hidden');
-
-        try {
-          const res = await apiCall('guardarOperacionHistorial', {
-            modo: document.getElementById('form-r-modo').value,
-            editId: document.getElementById('form-r-edit-id').value,
-            codigo: document.getElementById('form-r-codigo').value.trim().toUpperCase(),
-            estatus: document.getElementById('form-r-estatus').value,
-            nombreIntermediario: document.getElementById('form-r-nombre').value.trim(),
-            nombreTomador: document.getElementById('form-r-tomador').value.trim(),
-            nombreAsegurado: document.getElementById('form-r-asegurado').value.trim(),
-            sucursal: document.getElementById('form-r-sucursal').value,
-            ejecutivo: document.getElementById('form-r-ejecutivo').value,
-            lider: document.getElementById('form-r-lider').value,
-            canal: document.getElementById('form-r-canal').value,
-            fechaInicio: document.getElementById('form-r-fechainicio').value,
-            fechaFin: document.getElementById('form-r-fechafin').value,
-            usuario: state.currentUser?.username || 'Sistema',
-            rol: state.currentUser?.rol || 'Operadora'
-          });
-
-          if (res && res.exito) {
-            aplicarDatosAlEstado(res);
-            cerrarModalR();
-            showToast(res.mensaje || 'Reclasificación guardada.');
-          } else {
-            errBox.textContent = (res && res.mensaje) || 'Error al guardar.';
-            errBox.classList.remove('hidden');
-          }
-        } catch (err) {
-          errBox.textContent = err.message;
-          errBox.classList.remove('hidden');
-        } finally {
-          document.getElementById('save-r-text').classList.remove('hidden');
-          document.getElementById('save-r-loading').classList.add('hidden');
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+      if (!
