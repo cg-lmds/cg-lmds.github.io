@@ -1,10 +1,7 @@
 import os
-from pathlib import Path
 from typing import Dict, Any, Optional
-from fastapi import FastAPI, Depends, HTTPException, Query, Request, status
+from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 
 from api.models import (
     LoginRequest, TokenResponse, UsuarioInfo,
@@ -19,9 +16,6 @@ from api.auth import (
 from api.services.sheets_client import sheets_service
 from api.services.business_rules import BusinessRulesService
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-PUBLIC_DIR = BASE_DIR / "public"
-
 app = FastAPI(
     title="Sistema de Control de Intermediarios y Reclasificaciones",
     version="2.0.0",
@@ -33,24 +27,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
 )
-
-# Servir archivos estáticos si la carpeta existe
-css_path = PUBLIC_DIR / "css"
-if css_path.exists():
-    app.mount("/css", StaticFiles(directory=str(css_path)), name="css")
-
-js_path = PUBLIC_DIR / "js"
-if js_path.exists():
-    app.mount("/js", StaticFiles(directory=str(js_path)), name="js")
-
-def render_html_page(filename: str):
-    file_path = PUBLIC_DIR / filename
-    if file_path.exists():
-        return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
-    raise HTTPException(status_code=404, detail=f"Página {filename} no encontrada")
 
 # =============================================================================
 # ENDPOINTS REST API (Soportan tanto /api/... como /...)
@@ -190,59 +169,3 @@ def guardar_reclasificacion(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
-
-# =============================================================================
-# ENRUTADOR UNIVERSAL DE INTERFACES HTML
-# =============================================================================
-@app.get("/login", response_class=HTMLResponse)
-@app.get("/login.html", response_class=HTMLResponse)
-def get_login():
-    return render_html_page("login.html")
-
-@app.get("/intermediarios", response_class=HTMLResponse)
-@app.get("/intermediarios.html", response_class=HTMLResponse)
-def get_intermediarios():
-    return render_html_page("intermediarios.html")
-
-@app.get("/historico", response_class=HTMLResponse)
-@app.get("/historico.html", response_class=HTMLResponse)
-def get_historico():
-    return render_html_page("historico.html")
-
-@app.get("/reclasificaciones", response_class=HTMLResponse)
-@app.get("/reclasificaciones.html", response_class=HTMLResponse)
-def get_reclasificaciones():
-    return render_html_page("reclasificaciones.html")
-
-@app.get("/historico-reclasificaciones", response_class=HTMLResponse)
-@app.get("/historico_reclasificaciones.html", response_class=HTMLResponse)
-def get_historico_reclasif():
-    return render_html_page("historico_reclasificaciones.html")
-
-@app.get("/bitacora", response_class=HTMLResponse)
-@app.get("/bitacora.html", response_class=HTMLResponse)
-def get_bitacora():
-    return render_html_page("bitacora.html")
-
-@app.api_route("/{path_name:path}", methods=["GET"])
-async def catch_all_views(request: Request, path_name: str):
-    clean = path_name.lower().strip("/")
-
-    if clean.startswith("css/") or clean.startswith("js/"):
-        file_path = PUBLIC_DIR / clean
-        if file_path.exists():
-            media = "text/css" if clean.endswith(".css") else "application/javascript"
-            return HTMLResponse(content=file_path.read_text(encoding="utf-8"), media_type=media)
-
-    if "intermediarios" in clean and "historico" not in clean:
-        return render_html_page("intermediarios.html")
-    elif "historico-reclasificaciones" in clean or "historico_reclasificaciones" in clean:
-        return render_html_page("historico_reclasificaciones.html")
-    elif "historico" in clean:
-        return render_html_page("historico.html")
-    elif "reclasificaciones" in clean:
-        return render_html_page("reclasificaciones.html")
-    elif "bitacora" in clean:
-        return render_html_page("bitacora.html")
-    else:
-        return render_html_page("login.html")
