@@ -1,15 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/", "destination": "/public/login.html" },
-    { "source": "/login", "destination": "/public/login.html" },
-    { "source": "/intermediarios", "destination": "/public/intermediarios.html" },
-    { "source": "/historico", "destination": "/public/historico.html" },
-    { "source": "/historico-reclasificaciones", "destination": "/public/historico_reclasificaciones.html" },
-    { "source": "/reclasificaciones", "destination": "/public/reclasificaciones.html" },
-    { "source": "/bitacora", "destination": "/public/bitacora.html" },
-    { "source": "/(.*)", "destination": "/public/$1" }
+    { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
-

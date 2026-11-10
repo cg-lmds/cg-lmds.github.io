@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from typing import Dict, Any, Optional
 
 from api.models import (
@@ -14,6 +18,9 @@ from api.auth import (
 )
 from api.services.sheets_client import sheets_service
 from api.services.business_rules import BusinessRulesService
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+PUBLIC_DIR = BASE_DIR / "public"
 
 app = FastAPI(
     title="Sistema de Control de Intermediarios y Reclasificaciones",
@@ -31,6 +38,55 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Servir archivos estáticos (CSS y JS)
+css_path = PUBLIC_DIR / "css"
+if css_path.exists():
+    app.mount("/css", StaticFiles(directory=str(css_path)), name="css")
+
+js_path = PUBLIC_DIR / "js"
+if js_path.exists():
+    app.mount("/js", StaticFiles(directory=str(js_path)), name="js")
+
+def render_html_page(filename: str):
+    file_path = PUBLIC_DIR / filename
+    if file_path.exists():
+        return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail=f"Página {filename} no encontrada")
+
+# =============================================================================
+# RUTAS DE INTERFACES HTML
+# =============================================================================
+@app.get("/", response_class=HTMLResponse)
+def get_root():
+    return render_html_page("login.html")
+
+@app.get("/login", response_class=HTMLResponse)
+def get_login():
+    return render_html_page("login.html")
+
+@app.get("/intermediarios", response_class=HTMLResponse)
+def get_intermediarios():
+    return render_html_page("intermediarios.html")
+
+@app.get("/historico", response_class=HTMLResponse)
+def get_historico():
+    return render_html_page("historico.html")
+
+@app.get("/reclasificaciones", response_class=HTMLResponse)
+def get_reclasificaciones():
+    return render_html_page("reclasificaciones.html")
+
+@app.get("/historico-reclasificaciones", response_class=HTMLResponse)
+def get_historico_reclasif():
+    return render_html_page("historico_reclasificaciones.html")
+
+@app.get("/bitacora", response_class=HTMLResponse)
+def get_bitacora():
+    return render_html_page("bitacora.html")
+
+# =============================================================================
+# ENDPOINTS REST API
+# =============================================================================
 @app.get("/api/health")
 def healthcheck():
     return {
