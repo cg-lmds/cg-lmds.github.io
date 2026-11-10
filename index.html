@@ -365,4 +365,295 @@
                 <option value="J-">J-</option>
                 <option value="G-">G-</option>
               </select>
-              <input id="form-m-cedula-num" type="text" placeholder="12
+              <input id="form-m-cedula-num" type="text" placeholder="12345678" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Correo Electrónico</label>
+            <div class="flex gap-2">
+              <input id="form-m-correo-user" type="text" placeholder="usuario" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+              <select id="form-m-correo-domain" class="w-36 px-2 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50" onchange="toggleCorreoCustom()">
+                <option value="@gmail.com">@gmail.com</option>
+                <option value="@hotmail.com">@hotmail.com</option>
+                <option value="@outlook.com">@outlook.com</option>
+                <option value="@yahoo.com">@yahoo.com</option>
+                <option value="custom">Personalizado...</option>
+              </select>
+            </div>
+            <input id="form-m-correo-custom" type="text" placeholder="@empresa.com" class="hidden w-full mt-2 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Fecha Inicio *</label>
+            <input id="form-m-fechainicio" type="date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700">Fecha Fin (Libera al ejecutivo)</label>
+            <input id="form-m-fechafin" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-orange-50 text-orange-900 border-orange-200" />
+          </div>
+        </div>
+        
+        <div id="form-m-error" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded"></div>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" id="btn-cerrar-modal-maestro" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium">Cancelar</button>
+          <button type="submit" id="btn-save-maestro" class="px-5 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium">
+            <span id="save-maestro-text">Guardar en Sistema</span>
+            <span id="save-maestro-loading" class="hidden">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURACIÓN DE LA API (REEMPLAZA ESTA URL CON TU DESPLIEGUE WEB APP)
+    // =========================================================================
+    const API_URL = "https://script.google.com/macros/s/TU_ID_DE_DESPLIEGUE/exec"; 
+
+    // Estado global de la aplicación
+    const state = {
+      currentUser: null,
+      historial: [], maestro: [], bitacora: [],
+      sucursales: [], ejecutivos: [], lideres: [], canales: []
+    };
+
+    let dtHistorial = null;
+    let dtMaestro = null;
+    let dtBitacora = null;
+
+    // --- Funciones Utilitarias ---
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'px-4 py-3 rounded-xl shadow-lg bg-slate-900 text-white text-xs font-medium flex items-center justify-between gap-3 toast-enter pointer-events-auto';
+      toast.innerHTML = `<span>${message}</span><button type="button" class="text-slate-400 hover:text-white text-xs" onclick="this.parentElement.remove()">✕</button>`;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+    }
+
+    async function apiCall(action, payload = {}) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          mode: 'cors',
+          body: JSON.stringify({ action, payload })
+        });
+        if (!response.ok) throw new Error('Error de red');
+        return await response.json();
+      } catch (error) {
+        throw new Error("No se pudo conectar con el servidor.");
+      }
+    }
+
+    // --- Lógica de Interfaz ---
+    function toggleCorreoCustom() {
+      const select = document.getElementById('form-m-correo-domain');
+      const customInput = document.getElementById('form-m-correo-custom');
+      if (select.value === 'custom') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+      } else {
+        customInput.classList.add('hidden');
+      }
+    }
+
+    function poblarSelect(id, opciones) {
+      const select = document.getElementById(id);
+      if(!select) return;
+      select.innerHTML = '<option value="">Seleccione...</option>';
+      opciones.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        select.appendChild(option);
+      });
+    }
+
+    // --- Carga de Datos ---
+    async function refrescarTodo(mostrarAviso = false) {
+      if (mostrarAviso) showToast('Sincronizando con Google Sheets...');
+      
+      try {
+        // Modo de desarrollo: Si no hay API_URL, usa datos falsos para probar la interfaz
+        if(API_URL.includes("TU_ID_DE_DESPLIEGUE")) {
+           showToast('⚠️ Modo Local: API_URL no configurada. Mostrando datos de prueba.');
+           state.maestro = [
+             { id: 'INT-001', cod: 'V-123', intermediario: 'Carlos Azocar', ejecutivo: 'Ejecutivo A', sucursal: 'Caracas', activo: 'SI' }
+           ];
+           state.sucursales = ['Caracas', 'Valencia'];
+           state.ejecutivos = ['Ejecutivo A', 'Ejecutivo B'];
+        } else {
+           const res = await apiCall('obtenerDatosSistema');
+           if (res.exito) {
+             state.historial = res.historial || [];
+             state.maestro = res.maestro || [];
+             state.bitacora = res.bitacora || [];
+             state.sucursales = res.sucursales || [];
+             state.ejecutivos = res.ejecutivos || [];
+             state.lideres = res.lideres || [];
+             state.canales = res.canales || [];
+           }
+        }
+        
+        poblarSelect('form-m-sucursal', state.sucursales);
+        poblarSelect('form-m-ejecutivo', state.ejecutivos);
+        poblarSelect('form-m-lider', state.lideres);
+        
+        renderTablaMaestro();
+        // Llama a renderTablaHistorial() y renderTablaBitacora() si implementas sus lógicas
+
+        if (mostrarAviso) showToast('Datos actualizados.');
+      } catch (e) {
+        showToast(e.message);
+      }
+    }
+
+    // --- Renderizado de Tablas ---
+    function renderTablaMaestro() {
+      if (dtMaestro) { dtMaestro.destroy(); }
+      const tbody = document.getElementById('maestro-tbody');
+      tbody.innerHTML = '';
+      document.getElementById('badge-maestro-count').textContent = state.maestro.length;
+
+      state.maestro.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.id || '-'}</td>
+          <td class="font-medium text-slate-900">${r.intermediario || '-'}</td>
+          <td class="font-mono">${r.cod || '-'}</td>
+          <td>${r.ejecutivo || '-'}</td>
+          <td>${r.fechaInicio || '-'}</td>
+          <td>${r.fechaFin || '-'}</td>
+          <td>${r.sucursal || '-'}</td>
+          <td>${r.lider || '-'}</td>
+          <td><span class="px-2 py-1 rounded text-xs ${r.activo==='SI'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${r.activo||'SI'}</span></td>
+          <td>${r.cedula || '-'}</td>
+          <td>${r.correo || '-'}</td>
+          <td>${r.fechaNac || '-'}</td>
+          <td>${r.fechaAfiliacion || '-'}</td>
+          <td><button class="text-blue-600 hover:underline text-xs btn-edit-maestro" data-cod="${r.cod}">Editar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      dtMaestro = $('#table-dt-maestro').DataTable({
+        pageLength: 25, scrollX: true, language: { search: "Buscar:" }
+      });
+    }
+
+    // --- Eventos y Formularios ---
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Login
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnText = document.getElementById('login-btn-text');
+        const btnLoad = document.getElementById('login-loading');
+        btnText.classList.add('hidden'); btnLoad.classList.remove('hidden');
+        
+        // Simulación de login para que puedas probar la interfaz localmente
+        setTimeout(() => {
+            document.getElementById('header-user-name').textContent = document.getElementById('login-username').value;
+            document.getElementById('header-user-role').textContent = 'Operador';
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            refrescarTodo(true);
+        }, 800);
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+      });
+
+      // Pestañas
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab');
+          document.querySelectorAll('.nav-tab-btn').forEach(b => {
+             b.className = b.getAttribute('data-tab') === target 
+               ? 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition flex items-center gap-1.5'
+               : 'nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5';
+          });
+          ['tab-control', 'tab-maestro', 'tab-bitacora'].forEach(sec => {
+            document.getElementById(sec).classList.toggle('hidden', sec !== target);
+          });
+          if(dtMaestro) dtMaestro.columns.adjust();
+        });
+      });
+
+      // Modales Maestro
+      document.getElementById('btn-nuevo-maestro').addEventListener('click', () => {
+        document.getElementById('maestro-form').reset();
+        document.getElementById('form-m-error').classList.add('hidden');
+        document.getElementById('modal-maestro-overlay').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-cerrar-modal-maestro').addEventListener('click', () => {
+        document.getElementById('modal-maestro-overlay').classList.add('hidden');
+      });
+
+      // Guardar Maestro
+      document.getElementById('maestro-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errBox = document.getElementById('form-m-error');
+        errBox.classList.add('hidden');
+
+        const btnText = document.getElementById('save-maestro-text');
+        const btnLoad = document.getElementById('save-maestro-loading');
+        btnText.classList.add('hidden'); btnLoad.classList.remove('hidden');
+
+        const cedTipo = document.getElementById('form-m-cedula-tipo').value;
+        const cedNum = document.getElementById('form-m-cedula-num').value.trim();
+        
+        const correoUser = document.getElementById('form-m-correo-user').value.trim();
+        const correoDomain = document.getElementById('form-m-correo-domain').value;
+
+        const payload = {
+          id: document.getElementById('form-m-id').value,
+          cod: document.getElementById('form-m-cod').value,
+          intermediario: document.getElementById('form-m-intermediario').value,
+          ejecutivo: document.getElementById('form-m-ejecutivo').value,
+          sucursal: document.getElementById('form-m-sucursal').value,
+          lider: document.getElementById('form-m-lider').value,
+          cedula: cedNum ? (cedTipo + cedNum) : "",
+          correo: correoUser ? (correoUser + (correoDomain === 'custom' ? document.getElementById('form-m-correo-custom').value.trim() : correoDomain)) : "",
+          fechaInicio: document.getElementById('form-m-fechainicio').value,
+          fechaFin: document.getElementById('form-m-fechafin').value,
+          activo: document.getElementById('form-m-activo').value
+        };
+
+        try {
+          if(API_URL.includes("AKfycbxwFoymU-WjE8jQ3nZm5GOklSQzGEjZA1_gjaetKFzMhg_Lm3EhLA45IurbovSVIXQG")) {
+             // Simular guardado local si no hay API
+             state.maestro.unshift(payload);
+             renderTablaMaestro();
+             document.getElementById('modal-maestro-overlay').classList.add('hidden');
+             showToast("Guardado localmente (Modo de prueba)");
+          } else {
+             const respuesta = await apiCall('guardarIntermediarioMaestro', payload);
+             if (respuesta.exito) {
+               showToast("Intermediario guardado exitosamente");
+               document.getElementById('modal-maestro-overlay').classList.add('hidden');
+               refrescarTodo();
+             } else {
+               errBox.textContent = respuesta.mensaje; // Aquí muestra el error de Fecha Fin
+               errBox.classList.remove('hidden');
+             }
+          }
+        } catch(err) {
+          errBox.textContent = err.message;
+          errBox.classList.remove('hidden');
+        } finally {
+          btnText.classList.remove('hidden'); btnLoad.classList.add('hidden');
+        }
+      });
+      
+    });
+  </script>
+</body>
+</html>
