@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Intermediarios | Sistema de Gestión</title>
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Header Superior -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-[1600px] w-full mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-14">
+        
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2.5">
+            <div class="w-2.5 h-6 bg-slate-900"></div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Control y Reclasificaciones
+            </span>
+          </div>
+
+          <nav class="flex items-center gap-6 text-xs">
+            <a href="/intermediarios" class="nav-tab nav-tab-active py-4 flex items-center gap-1.5">
+              <span>Control de Intermediarios</span>
+            </a>
+            <a href="/historico" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Histórico Maestro</span>
+            </a>
+            <a href="/reclasificaciones" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Control de Reclasificación</span>
+            </a>
+            <a href="/historico-reclasificaciones" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Histórico Reclasificaciones</span>
+            </a>
+            <a href="/bitacora" data-role="Supervisor" class="nav-tab py-4 flex items-center gap-1.5 hidden">
+              <span>Bitácora de Auditoría</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="flex flex-col text-right">
+            <span id="header-user-name" class="text-xs font-semibold text-slate-800">Usuario</span>
+            <span id="header-user-role" class="text-[10px] text-slate-500 uppercase font-mono">Rol</span>
+          </div>
+          <button id="btn-logout" type="button" class="btn-outline px-3 py-1.5 text-xs font-medium">
+            Salir
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-4">
+    
+    <!-- Barra Superior de Acciones y Métricas -->
+    <div class="surface-box p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xs font-bold uppercase tracking-wider text-slate-900">
+          Control de Intermediarios
+        </h1>
+        <span id="badge-total-maestro" class="text-[11px] font-mono px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-300">
+          0 registros
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-nuevo-maestro" type="button" class="btn-dark px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Nuevo Intermediario</span>
+        </button>
+        <button id="btn-refresh-maestro" type="button" class="btn-outline px-3 py-1.5 text-xs font-semibold" title="Sincronizar">
+          ↻ Sincronizar
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="surface-box p-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Sucursal</label>
+        <select id="filter-m-sucursal" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todas las Sucursales</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Ejecutivo</label>
+        <select id="filter-m-ejecutivo" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todos los Ejecutivos</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Condición (Activo)</label>
+        <select id="filter-m-activo" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todos</option>
+          <option value="SI">Activo (SI)</option>
+          <option value="NO">Inactivo (NO)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabla Principal -->
+    <div class="surface-box p-4 overflow-hidden">
+      <table id="table-dt-maestro" class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr>
+            <th>Intermediario</th>
+            <th>Código</th>
+            <th>Cédula</th>
+            <th>Ejecutivo Actual</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Sucursal</th>
+            <th>Líder</th>
+            <th>Condición</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- MODAL: NUEVO / EDITAR INTERMEDIARIO -->
+  <div id="modal-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 max-w-2xl w-full p-6 shadow-2xl modal-panel max-h-[92vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 id="modal-maestro-title" class="text-xs font-bold uppercase tracking-wider text-slate-900">
+          Nuevo Intermediario
+        </h3>
+        <button id="modal-m-btn-close" type="button" class="text-slate-400 hover:text-slate-900 font-bold">✕</button>
+      </div>
+
+      <!-- Alerta de liberación de ejecutivo -->
+      <div id="aviso-bloqueo-ejecutivo" class="hidden my-3 p-3 bg-slate-100 border-l-4 border-slate-800 text-xs text-slate-700"></div>
+      <div id="form-m-error" class="hidden my-3 p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
+
+      <form id="maestro-form" class="space-y-4 pt-3">
+        <input type="hidden" id="form-m-id" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Nombre Intermediario *</label>
+            <input type="text" id="form-m-intermediario" required class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Código *</label>
+            <input type="text" id="form-m-cod" required class="w-full px-2.5 py-1.5 text-xs input-flat font-mono uppercase" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Cédula</label>
+            <div class="flex gap-1.5">
+              <select id="form-m-cedula-tipo" class="px-2 py-1.5 text-xs input-flat w-16">
+                <option value="V-">V-</option>
+                <option value="E-">E-</option>
+                <option value="J-">J-</option>
+                <option value="G-">G-</option>
+              </select>
+              <input type="text" id="form-m-cedula-num" class="flex-1 px-2.5 py-1.5 text-xs input-flat font-mono" placeholder="12345678" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Correo Electrónico</label>
+            <input type="email" id="form-m-correo" class="w-full px-2.5 py-1.5 text-xs input-flat" placeholder="nombre@correo.com" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Ejecutivo Asignado</label>
+            <select id="form-m-ejecutivo" class="w-full px-2.5 py-1.5 text-xs input-flat">
+              <option value="">Seleccione...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Sucursal</label>
+            <select id="form-m-sucursal" class="w-full px-2.5 py-1.5 text-xs input-flat">
+              <option value="">Seleccione...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Líder</label>
+            <select id="form-m-lider" class="w-full px-2.5 py-1.5 text-xs input-flat">
+              <option value="">Seleccione...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha Inicio</label>
+            <input type="date" id="form-m-fechainicio" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha Fin (Para Liberación)</label>
+            <input type="date" id="form-m-fechafin" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha Nacimiento</label>
+            <input type="date" id="form-m-fechanac" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha Afiliación</label>
+            <input type="date" id="form-m-fechaafiliacion" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Condición (Activo)</label>
+            <select id="form-m-activo" class="w-full px-2.5 py-1.5 text-xs input-flat">
+              <option value="SI">SI (Activo)</option>
+              <option value="NO">NO (Inactivo)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-200">
+          <button id="modal-m-btn-cancel" type="button" class="btn-outline px-4 py-2 text-xs font-semibold">Cancelar</button>
+          <button type="submit" id="modal-m-btn-submit" class="btn-dark px-5 py-2 text-xs font-semibold">Guardar Intermediario</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MODAL: HISTORIAL POR INTERMEDIARIO -->
+  <div id="history-maestro-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 max-w-4xl w-full p-6 shadow-2xl modal-panel max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">Histórico de Asignaciones</h3>
+          <p id="history-m-subtitle" class="text-xs text-slate-500 font-mono mt-0.5"></p>
+        </div>
+        <button id="history-m-btn-close" type="button" class="text-slate-400 hover:text-slate-900 font-bold">✕</button>
+      </div>
+
+      <div class="overflow-x-auto border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-800 font-semibold uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Intermediario</th>
+              <th class="py-2.5 px-3">Código</th>
+              <th class="py-2.5 px-3">Ejecutivo</th>
+              <th class="py-2.5 px-3">Sucursal / Líder</th>
+              <th class="py-2.5 px-3">Periodo (Inicio → Fin)</th>
+              <th class="py-2.5 px-3">Condición</th>
+            </tr>
+          </thead>
+          <tbody id="history-m-tbody" class="divide-y divide-slate-200"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-3 text-center border-t border-slate-200 bg-white text-[11px] text-slate-500">
+    Desarrollado y administrado por el departamento de control y gestión
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/intermediarios.js"></script>
+</body>
+</html>
+

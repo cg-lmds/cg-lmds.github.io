@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso | Sistema de Control de Intermediarios y Reclasificaciones</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col justify-between">
+  
+  <header class="border-b border-slate-200 bg-white py-3 px-6">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-2.5 h-6 bg-slate-900"></div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
+          Control de Intermediarios y Reclasificaciones
+        </span>
+      </div>
+      <span class="text-[11px] font-mono text-slate-500">v2.0 · Python Serverless</span>
+    </div>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm surface-box p-8 space-y-6 shadow-sm">
+      <div class="space-y-1">
+        <h1 class="text-sm font-bold uppercase tracking-wider text-slate-900">Iniciar Sesión</h1>
+        <p class="text-xs text-slate-500">Ingrese sus credenciales de acceso al sistema.</p>
+      </div>
+
+      <div id="login-error" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
+
+      <form id="login-form" class="space-y-4">
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold uppercase text-slate-700">Usuario</label>
+          <input type="text" id="login-user" required autocomplete="username"
+                 class="w-full px-3 py-2 text-xs input-flat" placeholder="supervisor u operadora" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold uppercase text-slate-700">Contraseña</label>
+          <input type="password" id="login-pass" required autocomplete="current-password"
+                 class="w-full px-3 py-2 text-xs input-flat" placeholder="••••••••" />
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="w-full btn-dark py-2.5 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2">
+          <span>Ingresar al Sistema</span>
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Roles: Supervisor / Operadora</span>
+        <span class="font-mono">JWT Secure</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-4 text-center border-t border-slate-200 bg-white text-[11px] text-slate-500">
+    Desarrollado y administrado por el departamento de control y gestión
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // Si ya existe sesión activa, redirigir directo al sistema
+    const existingToken = localStorage.getItem(TOKEN_KEY);
+    if (existingToken) {
+      window.location.href = '/intermediarios';
+    }
+
+    const form = document.getElementById('login-form');
+    const errBox = document.getElementById('login-error');
+    const submitBtn = document.getElementById('login-submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errBox.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Verificando...</span>';
+
+      const username = document.getElementById('login-user').value.trim();
+      const password = document.getElementById('login-pass').value.trim();
+
+      try {
+        const res = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
+
+        localStorage.setItem(TOKEN_KEY, res.access_token);
+        localStorage.setItem(USER_KEY, JSON.stringify(res.usuario));
+
+        window.location.href = '/intermediarios';
+      } catch (err) {
+        errBox.textContent = err.message || 'Error al autenticar.';
+        errBox.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Ingresar al Sistema</span>';
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Reclasificaciones | Sistema de Gestión</title>
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Header Superior -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-[1600px] w-full mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-14">
+        
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2.5">
+            <div class="w-2.5 h-6 bg-slate-900"></div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Control y Reclasificaciones
+            </span>
+          </div>
+
+          <nav class="flex items-center gap-6 text-xs">
+            <a href="/intermediarios" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Control de Intermediarios</span>
+            </a>
+            <a href="/historico" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Histórico Maestro</span>
+            </a>
+            <a href="/reclasificaciones" class="nav-tab nav-tab-active py-4 flex items-center gap-1.5">
+              <span>Control de Reclasificación</span>
+            </a>
+            <a href="/historico-reclasificaciones" class="nav-tab py-4 flex items-center gap-1.5">
+              <span>Histórico Reclasificaciones</span>
+            </a>
+            <a href="/bitacora" data-role="Supervisor" class="nav-tab py-4 flex items-center gap-1.5 hidden">
+              <span>Bitácora de Auditoría</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="flex flex-col text-right">
+            <span id="header-user-name" class="text-xs font-semibold text-slate-800">Usuario</span>
+            <span id="header-user-role" class="text-[10px] text-slate-500 uppercase font-mono">Rol</span>
+          </div>
+          <button id="btn-logout" type="button" class="btn-outline px-3 py-1.5 text-xs font-medium">
+            Salir
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-4">
+    
+    <!-- Barra Superior -->
+    <div class="surface-box p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xs font-bold uppercase tracking-wider text-slate-900">
+          Control de Reclasificaciones
+        </h1>
+        <span id="badge-total-r" class="text-[11px] font-mono px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-300">
+          0 registros
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-nueva-reclasif" type="button" class="btn-dark px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Nueva Reclasificación</span>
+        </button>
+        <button id="btn-refresh-r" type="button" class="btn-outline px-3 py-1.5 text-xs font-semibold" title="Sincronizar">
+          ↻ Sincronizar
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="surface-box p-3 grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Sucursal</label>
+        <select id="filter-r-sucursal" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todas las Sucursales</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Ejecutivo</label>
+        <select id="filter-r-ejecutivo" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todos los Ejecutivos</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Canal</label>
+        <select id="filter-r-canal" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todos los Canales</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Condición</label>
+        <select id="filter-r-estatus" class="w-full px-2.5 py-1.5 text-xs input-flat">
+          <option value="">Todos</option>
+          <option value="ACTIVO">Activo</option>
+          <option value="INACTIVO">Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabla Principal Reclasificaciones -->
+    <div class="surface-box p-4 overflow-hidden">
+      <table id="table-dt-reclasif" class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr>
+            <th>Nro. Póliza</th>
+            <th>Intermediario Original</th>
+            <th>Tomador / Asegurado</th>
+            <th>Corrección Intermediario</th>
+            <th>Sucursal Reclasif</th>
+            <th>Ejecutivo Reclasif</th>
+            <th>Líder / Canal</th>
+            <th>Vigencia</th>
+            <th>Condición</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- MODAL: NUEVA / EDITAR RECLASIFICACIÓN -->
+  <div id="modal-reclasif-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/50 modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 max-w-3xl w-full p-6 shadow-2xl modal-panel max-h-[92vh] overflow-y-auto space-y-4">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <h3 id="modal-r-title" class="text-xs font-bold uppercase tracking-wider text-slate-900">
+            Registro de Reclasificación
+          </h3>
+          <p class="text-[11px] text-slate-500">Alineación de pólizas con intermediarios maestros.</p>
+        </div>
+        <button id="modal-r-btn-close" type="button" class="text-slate-400 hover:text-slate-900 font-bold">✕</button>
+      </div>
+
+      <!-- Alertas de Cierre Automático y Errores -->
+      <div id="r-closure-box" class="hidden p-3 bg-emerald-50 border-l-4 border-emerald-700 text-xs text-emerald-900"></div>
+      <div id="form-r-error" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
+
+      <form id="reclasif-form" class="space-y-4">
+        <input type="hidden" id="form-r-edit-id" />
+        <input type="hidden" id="form-r-modo" value="NEW_OR_RECLASSIFY" />
+
+        <!-- SECCIÓN 1: DATOS DE LA PÓLIZA -->
+        <div class="p-3 bg-slate-50 border border-slate-200 space-y-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-700">1. Datos de la Póliza</div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Nro. de Póliza *</label>
+              <input type="text" id="form-r-nropoliza" required class="w-full px-2.5 py-1.5 text-xs input-flat font-mono uppercase" placeholder="POL-12345" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Nombre y Apellido Intermediario (Original) *</label>
+              <input type="text" id="form-r-nombreoriginal" required class="w-full px-2.5 py-1.5 text-xs input-flat" placeholder="Nombre que figura en la póliza" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Nombre del Tomador</label>
+              <input type="text" id="form-r-tomador" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Nombre del Asegurado</label>
+              <input type="text" id="form-r-asegurado" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: CONEXIÓN CON CONTROL DE INTERMEDIARIOS -->
+        <div class="p-3 bg-slate-50 border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-700">2. Corrección y Reclasificación (Enlace Maestro)</span>
+            <span class="text-[10px] text-emerald-800 font-mono font-medium">Autocompletado activo</span>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">CORRECCIÓN INTERMEDIARIO * (Seleccione o escriba)</label>
+            <div class="relative">
+              <input type="text" id="form-r-correccion" list="datalist-intermediarios" required
+                     class="w-full px-2.5 py-1.5 text-xs input-flat font-semibold text-slate-900"
+                     placeholder="Escriba para buscar en el Control de Intermediarios..." />
+              <datalist id="datalist-intermediarios"></datalist>
+            </div>
+            <input type="hidden" id="form-r-codigo-int" />
+          </div>
+
+          <div id="r-maestro-match-info" class="hidden p-2.5 bg-white border border-slate-200 text-xs space-y-1">
+            <div class="flex items-center justify-between font-mono text-[11px]">
+              <span id="match-cod" class="font-bold text-slate-900"></span>
+              <span id="match-activo" class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 font-bold"></span>
+            </div>
+            <div id="match-detalles" class="text-slate-600"></div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">SUCURSAL_RECLASIF *</label>
+              <select id="form-r-sucursal" required class="w-full px-2.5 py-1.5 text-xs input-flat">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">EJECUTIVO_RECLASIF *</label>
+              <select id="form-r-ejecutivo" required class="w-full px-2.5 py-1.5 text-xs input-flat">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">LIDER_RECLASIF</label>
+              <select id="form-r-lider" class="w-full px-2.5 py-1.5 text-xs input-flat">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">CANAL_RECLASIF</label>
+              <select id="form-r-canal" class="w-full px-2.5 py-1.5 text-xs input-flat">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: VIGENCIA Y CONDICIÓN -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha de Inicio *</label>
+            <input type="date" id="form-r-fechainicio" required class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Fecha Fin (Opcional)</label>
+            <input type="date" id="form-r-fechafin" class="w-full px-2.5 py-1.5 text-xs input-flat" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Condición</label>
+            <select id="form-r-estatus" class="w-full px-2.5 py-1.5 text-xs input-flat">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+          <button id="modal-r-btn-cancel" type="button" class="btn-outline px-4 py-2 text-xs font-semibold">Cancelar</button>
+          <button type="submit" id="modal-r-btn-submit" class="btn-dark px-5 py-2 text-xs font-semibold">Guardar Reclasificación</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <footer class="py-3 text-center border-t border-slate-200 bg-white text-[11px] text-slate-500">
+    Desarrollado y administrado por el departamento de control y gestión
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/reclasificaciones.js"></script>
+</body>
+</html>
+

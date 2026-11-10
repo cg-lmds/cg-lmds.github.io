@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cargando...</title>
+  <script src="/js/api.js"></script>
+</head>
+<body style="background:#f8fafc; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;">
+  <div style="font-size:12px; color:#64748b; letter-spacing:0.05em; text-transform:uppercase; font-weight:600;">
+    Cargando sistema...
+  </div>
+  <script>
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      window.location.replace('/intermediarios');
+    } else {
+      window.location.replace('/login');
+    }
+  </script>
+</body>
+</html>
+
