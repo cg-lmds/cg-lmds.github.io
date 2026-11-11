@@ -18,13 +18,19 @@ async function apiFetch(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  // Compatibilidad universal con Vercel FastAPI:
+  let targetUrl = endpoint;
+  if (targetUrl.startsWith('/api/')) {
+    targetUrl = targetUrl.replace('/api/', '/');
+  }
+
   const config = {
     ...options,
     headers
   };
 
   try {
-    const response = await fetch(endpoint, config);
+    const response = await fetch(targetUrl, config);
     if (response.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);

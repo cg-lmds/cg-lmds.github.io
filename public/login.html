@@ -84,7 +84,7 @@
       const password = document.getElementById('login-pass').value.trim();
 
       try {
-        const res = await apiFetch('/api/auth/login', {
+        const res = await apiFetch('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ username, password })
         });
