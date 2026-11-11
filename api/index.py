@@ -46,6 +46,8 @@ def healthcheck():
 
 @app.post("/auth/login", response_model=TokenResponse)
 @app.post("/api/auth/login", response_model=TokenResponse)
+@app.post("/login", response_model=TokenResponse)
+@app.post("/api/login", response_model=TokenResponse)
 def login(request: LoginRequest):
     username_clean = request.username.strip().lower()
     password_clean = request.password.strip()
@@ -99,6 +101,8 @@ def me(current_user: UsuarioInfo = Depends(get_current_user)):
 
 @app.get("/data/sistema")
 @app.get("/api/data/sistema")
+@app.get("/sistema")
+@app.get("/api/sistema")
 def get_sistema_data(current_user: UsuarioInfo = Depends(get_current_user)):
     data = sheets_service.fetch_all_data()
     data["usuario_actual"] = current_user.model_dump()
