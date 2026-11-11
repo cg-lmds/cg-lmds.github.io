@@ -20,7 +20,8 @@ app = FastAPI(
     title="Sistema de Control de Intermediarios y Reclasificaciones",
     version="2.0.0",
     docs_url="/docs",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
+    redirect_slashes=False
 )
 
 app.add_middleware(
