@@ -42,8 +42,11 @@ function checkAuth(requiredRoles = []) {
 function updateHeaderUI(user) {
   const nameEl = document.getElementById('header-user-name');
   const roleEl = document.getElementById('header-user-role');
-  if (nameEl) nameEl.textContent = user.nombre || user.username;
+  const avatarEl = document.getElementById('header-user-avatar');
+  const displayName = user.nombre || user.username || 'Usuario';
+  if (nameEl) nameEl.textContent = displayName;
   if (roleEl) roleEl.textContent = user.rol || 'Operadora';
+  if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
 
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) {

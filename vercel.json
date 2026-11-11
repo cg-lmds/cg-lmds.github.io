@@ -1,5 +1,16 @@
 {
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" }
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/auth/(.*)", "destination": "/api/index.py" },
+    { "source": "/data/(.*)", "destination": "/api/index.py" },
+    { "source": "/intermediarios/(.*)", "destination": "/api/index.py" },
+    { "source": "/reclasificaciones/(.*)", "destination": "/api/index.py" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/reclasificaciones", "destination": "/reclasificaciones.html" },
+    { "source": "/intermediarios", "destination": "/intermediarios.html" },
+    { "source": "/historico", "destination": "/historico.html" },
+    { "source": "/historico_reclasificaciones", "destination": "/historico_reclasificaciones.html" },
+    { "source": "/bitacora", "destination": "/bitacora.html" }
   ]
 }

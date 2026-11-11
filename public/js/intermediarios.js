@@ -1,5 +1,6 @@
 /**
  * Controlador de Control de Intermediarios (Maestro)
+ * Conexión Snapshot-Before-Update e Interfaz Industrial
  */
 
 let dtMaestro = null;
@@ -21,13 +22,14 @@ $(document).ready(async () => {
   // Eventos de botones principales
   $('#btn-nuevo-maestro').on('click', () => abrirModalMaestro());
   $('#btn-refresh-maestro').on('click', async () => {
-    showToast('Actualizando datos...');
+    showToast('Sincronizando intermediarios con Google Cloud...');
     await cargarDatos();
-    showToast('Datos sincronizados.');
+    showToast('Datos sincronizados en tiempo real.');
   });
 
   // Filtros
   $('#filter-m-sucursal, #filter-m-ejecutivo, #filter-m-activo').on('change', aplicarFiltros);
+  $('#btn-clear-filters-m').on('click', limpiarFiltrosMaestro);
 
   // Cerrar modales
   $('#modal-m-btn-close, #modal-m-btn-cancel').on('click', cerrarModalMaestro);
@@ -39,7 +41,7 @@ $(document).ready(async () => {
   // Delegación de eventos en tabla
   $('#table-dt-maestro tbody').on('click', '.btn-edit-maestro', function() {
     const cod = String($(this).data('cod'));
-    const reg = currentData.maestro.find(x => String(x.cod).toUpperCase() === cod.toUpperCase());
+    const reg = (currentData.maestro || []).find(x => String(x.cod).toUpperCase() === cod.toUpperCase());
     if (reg) abrirModalMaestro(reg);
   }).on('click', '.btn-hist-maestro', function() {
     const cod = String($(this).data('cod'));
@@ -74,15 +76,25 @@ async function cargarDatos() {
     const res = await apiFetch('/api/data/sistema');
     currentData = res;
 
-    // Poblar filtros y selects
+    actualizarKPIsMaestro(res.maestro || []);
     poblarCatalogos();
-
-    // Renderizar tabla
     renderizarTablaMaestro(res.maestro || []);
-    $('#badge-total-maestro').text(`${(res.maestro || []).length} registros`);
+    $('#badge-total-maestro').text(`${(res.maestro || []).length} intermediarios`);
   } catch (err) {
     showToast('Error cargando datos del sistema: ' + err.message, true);
   }
+}
+
+function actualizarKPIsMaestro(maestro) {
+  const total = maestro.length;
+  const activos = maestro.filter(x => String(x.activo).toUpperCase() === 'SI').length;
+  const sucursales = (currentData.sucursales || []).length;
+  const ejecutivos = (currentData.ejecutivos || []).length;
+
+  $('#kpi-total-intermediarios').text(total.toLocaleString());
+  $('#kpi-intermediarios-activos').text(activos.toLocaleString());
+  $('#kpi-m-sucursales').text(sucursales);
+  $('#kpi-m-ejecutivos').text(ejecutivos);
 }
 
 function poblarCatalogos() {
@@ -123,33 +135,50 @@ function renderizarTablaMaestro(datos) {
     order: [[0, 'asc']],
     columns: [
       {
+        data: 'id',
+        render: d => `<span class="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 border border-slate-200">${d || '—'}</span>`
+      },
+      {
         data: 'intermediario',
-        render: d => `<span class="font-semibold text-slate-900">${d || '—'}</span>`
+        render: (d, t, row) => `
+          <div>
+            <span class="font-bold text-slate-900">${d || '—'}</span>
+            ${row.cedula ? `<div class="text-[10px] font-mono text-slate-500">RIF/CI: ${row.cedula}</div>` : ''}
+          </div>
+        `
       },
       {
         data: 'cod',
-        render: d => `<span class="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5">${d || '—'}</span>`
-      },
-      {
-        data: 'cedula',
-        render: d => `<span class="font-mono text-xs text-slate-600">${d || '—'}</span>`
+        render: d => `<span class="font-mono text-xs font-bold text-slate-900 bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5">${d || '—'}</span>`
       },
       {
         data: 'ejecutivo',
-        render: d => d ? `<span class="font-medium text-slate-800">${d}</span>` : '<span class="text-slate-400 italic">Sin asignar</span>'
+        render: d => d ? `<span class="font-semibold text-slate-800">${d}</span>` : '<span class="text-slate-400 italic text-[11px]">Sin asignar</span>'
       },
-      { data: 'fechaInicio', render: d => formatearFechaUI(d) },
-      { data: 'fechaFin', render: d => formatearFechaUI(d) },
-      { data: 'sucursal', render: d => d || '—' },
-      { data: 'lider', render: d => d || '—' },
+      {
+        data: 'sucursal',
+        render: d => d ? `<span class="font-medium text-slate-700">${d}</span>` : '<span class="text-slate-400">—</span>'
+      },
+      {
+        data: 'lider',
+        render: d => d ? `<span class="text-xs text-slate-600">${d}</span>` : '<span class="text-slate-400">—</span>'
+      },
+      {
+        data: null,
+        render: (d, t, row) => `
+          <span class="font-mono text-[11px] text-slate-600 block">
+            ${formatearFechaUI(row.fechaInicio)} → ${formatearFechaUI(row.fechaFin)}
+          </span>
+        `
+      },
       {
         data: 'activo',
         render: (d, t, row) => {
           const act = String(d).toUpperCase() === 'SI';
           if (esSupervisor) {
-            return `<button type="button" class="btn-toggle-activo px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${act ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-600 border border-slate-300'}" data-cod="${row.cod}" data-id="${row.id}" data-act="${row.activo}">${act ? 'SI' : 'NO'}</button>`;
+            return `<button type="button" class="btn-toggle-activo badge-tech ${act ? 'badge-active' : 'badge-inactive'} cursor-pointer" data-cod="${row.cod}" data-id="${row.id}" data-act="${row.activo}" title="Clic para alternar condición">${act ? 'ACTIVO' : 'INACTIVO'}</button>`;
           }
-          return `<span class="px-2 py-0.5 text-[10px] font-bold uppercase ${act ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 border border-slate-300'}">${act ? 'SI' : 'NO'}</span>`;
+          return `<span class="badge-tech ${act ? 'badge-active' : 'badge-inactive'}">${act ? 'ACTIVO' : 'INACTIVO'}</span>`;
         }
       },
       {
@@ -158,7 +187,7 @@ function renderizarTablaMaestro(datos) {
         orderable: false,
         render: (d, t, row) => `
           <div class="flex items-center justify-end gap-1.5">
-            <button type="button" class="btn-edit-maestro btn-outline px-2 py-1 text-[11px] font-semibold" data-cod="${row.cod}" title="Editar">
+            <button type="button" class="btn-edit-maestro btn-outline px-2.5 py-1 text-[11px] font-semibold" data-cod="${row.cod}" title="Editar Intermediario">
               Editar
             </button>
             <button type="button" class="btn-hist-maestro btn-outline px-2 py-1 text-[11px] font-semibold" data-cod="${row.cod}" title="Ver Historial">
@@ -186,53 +215,49 @@ function aplicarFiltros() {
   const ej = $('#filter-m-ejecutivo').val();
   const act = $('#filter-m-activo').val();
 
-  dtMaestro.column(6).search(suc ? `^${suc}$` : '', true, false);
+  dtMaestro.column(4).search(suc ? `^${suc}$` : '', true, false);
   dtMaestro.column(3).search(ej ? `^${ej}$` : '', true, false);
-  dtMaestro.column(8).search(act ? `^${act}$` : '', true, false);
+  dtMaestro.column(7).search(act ? (act === 'SI' ? 'ACTIVO' : 'INACTIVO') : '', true, false);
   dtMaestro.draw();
+}
+
+function limpiarFiltrosMaestro() {
+  $('#filter-m-sucursal').val('');
+  $('#filter-m-ejecutivo').val('');
+  $('#filter-m-activo').val('');
+  if (dtMaestro) {
+    dtMaestro.search('').columns().search('').draw();
+  }
 }
 
 function abrirModalMaestro(reg = null) {
   editingOriginal = reg;
   const errBox = $('#form-m-error').addClass('hidden');
-  const aviso = $('#aviso-bloqueo-ejecutivo').addClass('hidden');
 
   if (reg) {
-    $('#modal-maestro-title').text('Editar Intermediario');
-    $('#form-m-id').val(reg.id || '');
-    $('#form-m-intermediario').val(reg.intermediario || '');
-    $('#form-m-cod').val(reg.cod || '').prop('readonly', true);
-    
-    // Parseo de cédula
-    const ced = String(reg.cedula || '').trim();
-    if (ced.startsWith('V-') || ced.startsWith('E-') || ced.startsWith('J-') || ced.startsWith('G-')) {
-      $('#form-m-cedula-tipo').val(ced.slice(0, 2));
-      $('#form-m-cedula-num').val(ced.slice(2));
-    } else {
-      $('#form-m-cedula-tipo').val('V-');
-      $('#form-m-cedula-num').val(ced);
-    }
+    $('#modal-m-title').text('Editar Intermediario Maestro');
+    $('#form-m-modo').val('EDITAR');
+    $('#form-m-id').val(reg.id);
 
+    $('#form-m-nombre').val(reg.intermediario);
+    $('#form-m-cod').val(reg.cod).prop('readonly', true).addClass('bg-slate-100');
+    $('#form-m-cedula').val(reg.cedula || '');
     $('#form-m-correo').val(reg.correo || '');
-    $('#form-m-ejecutivo').val(reg.ejecutivo || '');
-    $('#form-m-sucursal').val(reg.sucursal || '');
+    $('#form-m-sucursal').val(reg.sucursal);
+    $('#form-m-ejecutivo').val(reg.ejecutivo);
     $('#form-m-lider').val(reg.lider || '');
-    $('#form-m-fechainicio').val(reg.fechaInicio || '');
-    $('#form-m-fechafin').val(reg.fechaFin || '');
-    $('#form-m-fechanac').val(reg.fechaNac || '');
-    $('#form-m-fechaafiliacion').val(reg.fechaAfiliacion || '');
-    $('#form-m-activo').val(reg.activo || 'SI');
-
-    if (reg.ejecutivo && (!reg.fechaFin || reg.fechaFin === '')) {
-      aviso.html(`<strong>Aviso:</strong> El intermediario está actualmente asignado a <strong>${reg.ejecutivo}</strong> sin Fecha Fin. Para reasignarlo a otro ejecutivo, primero asígnele su Fecha Fin para liberarlo.`);
-      aviso.removeClass('hidden');
-    }
+    $('#form-m-fechainicio').val(formatearFechaInput(reg.fechaInicio));
+    $('#form-m-fechafin').val(formatearFechaInput(reg.fechaFin));
+    $('#form-m-activo').val(reg.activo);
   } else {
-    $('#modal-maestro-title').text('Nuevo Intermediario');
-    $('#maestro-form')[0].reset();
+    $('#modal-m-title').text('Registrar Nuevo Intermediario');
+    $('#form-m-modo').val('CREAR');
     $('#form-m-id').val('');
-    $('#form-m-cod').prop('readonly', false);
+
+    $('#maestro-form')[0].reset();
+    $('#form-m-cod').prop('readonly', false).removeClass('bg-slate-100');
     $('#form-m-activo').val('SI');
+    $('#form-m-fechainicio').val(new Date().toISOString().slice(0, 10));
   }
 
   $('#modal-maestro-overlay').removeClass('hidden');
@@ -246,36 +271,39 @@ function cerrarModalMaestro() {
 async function guardarMaestro(e) {
   e.preventDefault();
   const errBox = $('#form-m-error').addClass('hidden');
-  const nuevoEjecutivo = $('#form-m-ejecutivo').val().trim();
+  const btnSubmit = $('#modal-m-btn-submit').prop('disabled', true).text('Guardando...');
 
-  // Validar bloqueo en cliente si reasigna ejecutivo sin fecha fin
-  if (editingOriginal && editingOriginal.ejecutivo && editingOriginal.ejecutivo !== nuevoEjecutivo && (!editingOriginal.fechaFin || editingOriginal.fechaFin === '')) {
-    errBox.text(`Operación bloqueada: El ejecutivo actual (${editingOriginal.ejecutivo}) aún no tiene Fecha Fin. Asigne Fecha Fin primero y guarde para liberarlo.`);
-    errBox.removeClass('hidden');
+  const cod = $('#form-m-cod').val().trim();
+  const intermediario = $('#form-m-nombre').val().trim();
+  const sucursal = $('#form-m-sucursal').val();
+  const ejecutivo = $('#form-m-ejecutivo').val();
+  const lider = $('#form-m-lider').val();
+  const cedula = $('#form-m-cedula').val().trim();
+  const correo = $('#form-m-correo').val().trim();
+  const fechaInicio = $('#form-m-fechainicio').val();
+  const fechaFin = $('#form-m-fechafin').val();
+  const activo = $('#form-m-activo').val();
+
+  if (!cod || !intermediario || !sucursal || !ejecutivo) {
+    errBox.text('Complete todos los campos obligatorios (*).').removeClass('hidden');
+    btnSubmit.prop('disabled', false).text('Guardar Intermediario');
     return;
   }
 
-  const cedTipo = $('#form-m-cedula-tipo').val();
-  const cedNum = $('#form-m-cedula-num').val().trim();
-  const cedulaFinal = cedNum ? (cedTipo + cedNum) : '';
-
   const payload = {
-    id: $('#form-m-id').val(),
-    cod: $('#form-m-cod').val().trim().toUpperCase(),
-    intermediario: $('#form-m-intermediario').val().trim(),
-    ejecutivo: nuevoEjecutivo,
-    sucursal: $('#form-m-sucursal').val().trim(),
-    lider: $('#form-m-lider').val().trim(),
-    activo: $('#form-m-activo').val(),
-    cedula: cedulaFinal,
-    correo: $('#form-m-correo').val().trim(),
-    fechaInicio: $('#form-m-fechainicio').val(),
-    fechaFin: $('#form-m-fechafin').val(),
-    fechaNac: $('#form-m-fechanac').val(),
-    fechaAfiliacion: $('#form-m-fechaafiliacion').val()
+    id: $('#form-m-id').val() || null,
+    modo: $('#form-m-modo').val(),
+    cod: cod,
+    intermediario: intermediario,
+    sucursal: sucursal,
+    ejecutivo: ejecutivo,
+    lider: lider,
+    cedula: cedula,
+    correo: correo,
+    fechaInicio: fechaInicio,
+    fechaFin: fechaFin,
+    activo: activo
   };
-
-  const btnSubmit = $('#modal-m-btn-submit').prop('disabled', true).text('Guardando...');
 
   try {
     const res = await apiFetch('/api/intermediarios/guardar', {
@@ -283,40 +311,44 @@ async function guardarMaestro(e) {
       body: JSON.stringify(payload)
     });
 
-    showToast(res.mensaje || 'Intermediario guardado.');
-    cerrarModalMaestro();
-    await cargarDatos();
+    if (res.exito) {
+      showToast(res.mensaje || 'Intermediario guardado.');
+      cerrarModalMaestro();
+      await cargarDatos();
+    } else {
+      errBox.text(res.mensaje || 'Error al guardar.').removeClass('hidden');
+    }
   } catch (err) {
-    errBox.text(err.message).removeClass('hidden');
+    errBox.text(err.message || 'Error de comunicación.').removeClass('hidden');
   } finally {
     btnSubmit.prop('disabled', false).text('Guardar Intermediario');
   }
 }
 
-function abrirModalHistorial(cod) {
-  const normCod = cod.trim().toUpperCase();
-  const items = (currentData.historicoMaestro || []).filter(x => String(x.cod).trim().toUpperCase() === normCod);
-  
-  $('#history-m-subtitle').text(`Código: ${normCod} · Total periodos históricos: ${items.length}`);
-  const tbody = $('#history-m-tbody').empty();
-
-  if (items.length === 0) {
-    tbody.append('<tr><td colspan="6" class="py-4 text-center text-slate-500 italic">No hay historial de reasignaciones para este código.</td></tr>');
-  } else {
-    items.forEach(item => {
-      tbody.append(`
-        <tr class="hover:bg-slate-50">
-          <td class="py-2.5 px-3 font-medium text-slate-900">${item.intermediario || '—'}</td>
-          <td class="py-2.5 px-3 font-mono text-slate-700">${item.cod || '—'}</td>
-          <td class="py-2.5 px-3 font-semibold text-slate-800">${item.ejecutivo || '—'}</td>
-          <td class="py-2.5 px-3 text-slate-600">${item.sucursal || '—'} / ${item.lider || '—'}</td>
-          <td class="py-2.5 px-3 font-mono text-slate-600">${formatearFechaUI(item.fechaInicio)} → ${formatearFechaUI(item.fechaFin)}</td>
-          <td class="py-2.5 px-3 font-bold text-[10px] ${item.activo === 'SI' ? 'text-emerald-700' : 'text-slate-500'}">${item.activo || 'SI'}</td>
-        </tr>
-      `);
-    });
+function formatearFechaUI(val) {
+  if (!val || val === '—') return '—';
+  const str = String(val).trim();
+  if (str.length >= 10 && str.includes('-')) {
+    const p = str.slice(0, 10).split('-');
+    if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`;
   }
-
-  $('#history-maestro-overlay').removeClass('hidden');
+  return str;
 }
 
+function formatearFechaInput(val) {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (str.length >= 10 && str.includes('-') && str.indexOf('-') === 4) {
+    return str.slice(0, 10);
+  }
+  if (str.includes('/')) {
+    const p = str.split('/');
+    if (p.length === 3) {
+      const d = p[0].padStart(2, '0');
+      const m = p[1].padStart(2, '0');
+      const y = p[2].length === 2 ? '20' + p[2] : p[2];
+      return `${y}-${m}-${d}`;
+    }
+  }
+  return '';
+}

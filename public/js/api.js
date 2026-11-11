@@ -18,10 +18,10 @@ async function apiFetch(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Compatibilidad universal con Vercel FastAPI:
+  // Enrutamiento unificado para endpoints
   let targetUrl = endpoint;
-  if (targetUrl.startsWith('/api/')) {
-    targetUrl = targetUrl.replace('/api/', '/');
+  if (!targetUrl.startsWith('/api/') && !targetUrl.startsWith('http')) {
+    targetUrl = `/api${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
   }
 
   const config = {

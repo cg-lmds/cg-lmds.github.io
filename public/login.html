@@ -3,47 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceso | Sistema de Control de Intermediarios y Reclasificaciones</title>
+  <title>Acceso Seguro | Sistema de Control de Intermediarios y Reclasificaciones</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 min-h-screen flex flex-col justify-between antialiased">
   
-  <header class="border-b border-slate-200 bg-white py-3 px-6">
+  <header class="border-b border-slate-200 bg-white py-3.5 px-6 shadow-xs">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-2.5 h-6 bg-slate-900"></div>
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
-          Control de Intermediarios y Reclasificaciones
-        </span>
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-900 block leading-tight">
+            Control de Intermediarios y Reclasificaciones
+          </span>
+          <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+            La Mundial de Seguros • Plataforma Central
+          </span>
+        </div>
       </div>
-      <span class="text-[11px] font-mono text-slate-500">v2.0 · Python Serverless</span>
+      <div class="flex items-center gap-2 font-mono text-[10px] text-slate-500 bg-slate-100 px-2.5 py-1 border border-slate-200">
+        <span class="status-dot"></span>
+        <span>v2.0 • Python Serverless</span>
+      </div>
     </div>
   </header>
 
   <main class="flex-1 flex items-center justify-center p-4">
-    <div class="w-full max-w-sm surface-box p-8 space-y-6 shadow-sm">
-      <div class="space-y-1">
+    <div class="w-full max-w-sm surface-box p-8 space-y-6 shadow-sm border-t-4 border-t-slate-900">
+      
+      <div class="space-y-1.5">
+        <div class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Módulo de Autenticación</div>
         <h1 class="text-sm font-bold uppercase tracking-wider text-slate-900">Iniciar Sesión</h1>
-        <p class="text-xs text-slate-500">Ingrese sus credenciales de acceso al sistema.</p>
+        <p class="text-xs text-slate-500">Ingrese sus credenciales corporativas autorizadas.</p>
       </div>
 
       <div id="login-error" class="hidden p-3 bg-red-50 border-l-4 border-red-700 text-xs text-red-800 font-medium"></div>
 
       <form id="login-form" class="space-y-4">
         <div class="space-y-1">
-          <label class="block text-xs font-semibold uppercase text-slate-700">Usuario</label>
+          <label class="block text-[11px] font-bold uppercase text-slate-700 tracking-wider">Usuario *</label>
           <input type="text" id="login-user" required autocomplete="username"
-                 class="w-full px-3 py-2 text-xs input-flat" placeholder="supervisor u operadora" />
+                 class="w-full px-3 py-2 text-xs input-flat font-mono font-medium" placeholder="ej: prueba26" />
         </div>
 
         <div class="space-y-1">
-          <label class="block text-xs font-semibold uppercase text-slate-700">Contraseña</label>
+          <label class="block text-[11px] font-bold uppercase text-slate-700 tracking-wider">Contraseña *</label>
           <input type="password" id="login-pass" required autocomplete="current-password"
-                 class="w-full px-3 py-2 text-xs input-flat" placeholder="••••••••" />
+                 class="w-full px-3 py-2 text-xs input-flat font-mono" placeholder="••••••••" />
         </div>
 
         <button type="submit" id="login-submit-btn" class="w-full btn-dark py-2.5 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2">
@@ -52,22 +62,21 @@
       </form>
 
       <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-        <span>Roles: Supervisor / Operadora</span>
-        <span class="font-mono">JWT Secure</span>
+        <span class="font-medium text-slate-500">Roles: Supervisor / Operadora</span>
+        <span class="font-mono text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 border border-emerald-200 text-[10px]">JWT RSA-256</span>
       </div>
     </div>
   </main>
 
-  <footer class="py-4 text-center border-t border-slate-200 bg-white text-[11px] text-slate-500">
-    Desarrollado y administrado por el departamento de control y gestión
+  <footer class="py-4 text-center border-t border-slate-200 bg-white text-[11px] text-slate-500 font-mono">
+    LMDS • Desarrollado y administrado por el departamento de control y gestión
   </footer>
 
   <script src="/js/api.js"></script>
   <script>
-    // Si ya existe sesión activa, redirigir directo al sistema
     const existingToken = localStorage.getItem(TOKEN_KEY);
     if (existingToken) {
-      window.location.href = '/intermediarios.html';
+      window.location.href = '/reclasificaciones.html';
     }
 
     const form = document.getElementById('login-form');
@@ -78,7 +87,13 @@
       e.preventDefault();
       errBox.classList.add('hidden');
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Verificando...</span>';
+      submitBtn.innerHTML = `
+        <svg class="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Verificando Credenciales...</span>
+      `;
 
       const username = document.getElementById('login-user').value.trim();
       const password = document.getElementById('login-pass').value.trim();
@@ -92,7 +107,7 @@
         localStorage.setItem(TOKEN_KEY, res.access_token);
         localStorage.setItem(USER_KEY, JSON.stringify(res.usuario));
 
-        window.location.href = '/intermediarios.html';
+        window.location.href = '/reclasificaciones.html';
       } catch (err) {
         errBox.textContent = err.message || 'Error al autenticar.';
         errBox.classList.remove('hidden');
@@ -104,4 +119,3 @@
   </script>
 </body>
 </html>
-

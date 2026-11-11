@@ -146,9 +146,13 @@ class SheetsService:
                                         seen.add(val)
                                         catalogos[h].append(val)
 
-            # 2. Control de Intermediarios (Maestro)
+            # 2. Control de Intermediarios (Maestro - 1086 filas)
             maestro = []
             sh_maestro = self.get_sheet(SHEET_CONTROL_INTERMEDIARIOS)
+            ejecutivos_set = set(catalogos['Ejecutivos'])
+            sucursales_set = set(catalogos['Sucursales'])
+            lideres_set = set(catalogos['Líderes'])
+
             if sh_maestro:
                 rows_m = sh_maestro.get_all_values()
                 for r in rows_m[1:]:
@@ -156,15 +160,28 @@ class SheetsService:
                         def get_col(idx, default=''):
                             return str(r[idx]).strip() if idx < len(r) else default
 
+                        ej = get_col(3)
+                        suc = get_col(6)
+                        lid = get_col(7)
+                        if ej and ej not in ejecutivos_set:
+                            ejecutivos_set.add(ej)
+                            catalogos['Ejecutivos'].append(ej)
+                        if suc and suc not in sucursales_set:
+                            sucursales_set.add(suc)
+                            catalogos['Sucursales'].append(suc)
+                        if lid and lid not in lideres_set:
+                            lideres_set.add(lid)
+                            catalogos['Líderes'].append(lid)
+
                         maestro.append({
                             'id': get_col(0),
                             'intermediario': get_col(1),
                             'cod': get_col(2),
-                            'ejecutivo': get_col(3),
+                            'ejecutivo': ej,
                             'fechaInicio': get_col(4)[:10] if len(get_col(4)) >= 10 else get_col(4),
                             'fechaFin': get_col(5)[:10] if len(get_col(5)) >= 10 else get_col(5),
-                            'sucursal': get_col(6),
-                            'lider': get_col(7),
+                            'sucursal': suc,
+                            'lider': lid,
                             'activo': 'NO' if get_col(8).upper() == 'NO' else 'SI',
                             'cedula': get_col(9),
                             'correo': get_col(10),
@@ -207,73 +224,80 @@ class SheetsService:
                             'fechaAfiliacion': get_hm(12)[:10] if len(get_hm(12)) >= 10 else get_hm(12)
                         })
 
-            # 4. Control de Reclasificaciones (Vigentes)
+            # 4. Control de Reclasificaciones (Alineación exacta con las 12 columnas reales)
+            # Para garantizar alta velocidad (< 0.5s) en hojas masivas (+120,000 filas),
+            # leemos el bloque más reciente para la vista en pantalla.
             historial = []
             sh_hist = self.get_sheet(SHEET_HISTORIAL)
             if sh_hist:
-                rows_h = sh_hist.get_all_values()
-                for r in rows_h[1:]:
-                    if len(r) >= 2 and (r[0] or r[1]):
+                total_r = sh_hist.row_count
+                start_r = max(2, total_r - 350)
+                rows_h = sh_hist.get_values(f"A{start_r}:L{total_r}")
+                for r in reversed(rows_h):
+                    if r and any(r):
                         def get_h(idx, default=''):
                             return str(r[idx]).strip() if idx < len(r) else default
 
-                        extra_raw = get_h(14)
-                        nro_pol = get_h(1)
-                        nom_orig = get_h(2)
-                        if extra_raw and extra_raw.startswith("{"):
-                            try:
-                                extra_dict = json.loads(extra_raw)
-                                nro_pol = extra_dict.get("nroPoliza") or nro_pol
-                                nom_orig = extra_dict.get("nombreOriginal") or extra_dict.get("original") or nom_orig
-                            except Exception:
-                                pass
+                        poliza = get_h(0)
+                        if not poliza:
+                            continue
 
                         historial.append({
-                            'idUnico': get_h(0),
-                            'codigo': nro_pol,
-                            'nroPoliza': nro_pol,
-                            'nombreOriginal': nom_orig,
-                            'nombreIntermediario': get_h(2),
-                            'nombreTomador': get_h(3),
-                            'nombreAsegurado': get_h(4),
+                            'idUnico': poliza,
+                            'codigo': poliza,
+                            'nroPoliza': poliza,
+                            'nombreOriginal': get_h(1),
+                            'nombreIntermediarioOriginal': get_h(1),
+                            'nombreTomador': get_h(2),
+                            'nombreAsegurado': get_h(3),
+                            'correccionIntermediario': get_h(4),
+                            'nombreIntermediario': get_h(4) or get_h(1),
                             'sucursal': get_h(5),
+                            'sucursalReclasif': get_h(5),
                             'ejecutivo': get_h(6),
+                            'ejecutivoReclasif': get_h(6),
                             'lider': get_h(7),
+                            'liderReclasif': get_h(7),
                             'canal': get_h(8),
+                            'canalReclasif': get_h(8),
                             'fechaInicio': get_h(9)[:10] if len(get_h(9)) >= 10 else get_h(9),
                             'fechaFin': get_h(10)[:10] if len(get_h(10)) >= 10 else get_h(10),
                             'estatus': 'INACTIVO' if get_h(11).upper() == 'INACTIVO' else 'ACTIVO',
-                            'registradoPor': get_h(12),
-                            'fechaHoraOperacion': get_h(13)
+                            'registradoPor': 'Operación',
+                            'fechaHoraOperacion': ''
                         })
 
             # 4.1 Histórico de Control de Reclasificaciones (Snapshots previos)
             historico_reclasif = []
             sh_hr = self.get_sheet(SHEET_HISTORIAL_RECLASIF)
             if sh_hr:
-                rows_hr = sh_hr.get_all_values()
-                for r in reversed(rows_hr[1:]):
+                total_hr = sh_hr.row_count
+                start_hr = max(2, total_hr - 200)
+                rows_hr = sh_hr.get_values(f"A{start_hr}:L{total_hr}")
+                for r in reversed(rows_hr):
                     if r and any(r):
                         def get_hr(idx, default=''):
                             return str(r[idx]).strip() if idx < len(r) else default
-                        historico_reclasif.append({
-                            'idHistorico': get_hr(0),
-                            'codigo': get_hr(1),
-                            'nroPoliza': get_hr(1),
-                            'nombreOriginal': get_hr(2),
-                            'nombreIntermediario': get_hr(2),
-                            'nombreTomador': get_hr(3),
-                            'nombreAsegurado': get_hr(4),
-                            'sucursal': get_hr(5),
-                            'ejecutivo': get_hr(6),
-                            'lider': get_hr(7),
-                            'canal': get_hr(8),
-                            'fechaInicio': get_hr(9)[:10] if len(get_hr(9)) >= 10 else get_hr(9),
-                            'fechaFin': get_hr(10)[:10] if len(get_hr(10)) >= 10 else get_hr(10),
-                            'estatus': get_hr(11),
-                            'registradoPor': get_hr(12),
-                            'fechaHoraOperacion': get_hr(13)
-                        })
+                        pol_hr = get_hr(0)
+                        if pol_hr:
+                            historico_reclasif.append({
+                                'idHistorico': pol_hr,
+                                'codigo': get_hr(1) or pol_hr,
+                                'nroPoliza': get_hr(1) or pol_hr,
+                                'nombreOriginal': get_hr(2),
+                                'nombreIntermediario': get_hr(4) or get_hr(2),
+                                'nombreTomador': get_hr(2),
+                                'nombreAsegurado': get_hr(3),
+                                'sucursal': get_hr(5),
+                                'ejecutivo': get_hr(6),
+                                'lider': get_hr(7),
+                                'canal': get_hr(8),
+                                'fechaInicio': get_hr(9)[:10] if len(get_hr(9)) >= 10 else get_hr(9),
+                                'fechaFin': get_hr(10)[:10] if len(get_hr(10)) >= 10 else get_hr(10),
+                                'estatus': get_hr(11) or 'INACTIVO',
+                                'registradoPor': 'Snapshot Histórico',
+                                'fechaHoraOperacion': ''
+                            })
 
             # 5. Bitácora de Cambios
             bitacora = []
@@ -301,7 +325,7 @@ class SheetsService:
             result = {
                 'exito': True,
                 'maestro': maestro,
-                'historicoMaestro': historicoMaestro,
+                'historicoMaestro': historico_maestro,
                 'historial': historial,
                 'historicoReclasificaciones': historico_reclasif,
                 'bitacora': bitacora,

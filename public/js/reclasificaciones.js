@@ -1,6 +1,7 @@
 /**
  * Controlador de Control de Reclasificaciones
  * Conexión bidireccional con Control de Intermediarios
+ * Interfaz Minimalista Industrial de Alto Rendimiento
  */
 
 let dtReclasif = null;
@@ -23,13 +24,14 @@ $(document).ready(async () => {
   // Eventos principales
   $('#btn-nueva-reclasif').on('click', () => abrirModalReclasif());
   $('#btn-refresh-r').on('click', async () => {
-    showToast('Actualizando datos...');
+    showToast('Sincronizando con Google Cloud...');
     await cargarDatos();
-    showToast('Datos sincronizados.');
+    showToast('Datos sincronizados en tiempo real.');
   });
 
   // Filtros
   $('#filter-r-sucursal, #filter-r-ejecutivo, #filter-r-canal, #filter-r-estatus').on('change', aplicarFiltros);
+  $('#btn-clear-filters').on('click', limpiarFiltros);
 
   // Cerrar modal
   $('#modal-r-btn-close, #modal-r-btn-cancel').on('click', cerrarModalReclasif);
@@ -46,7 +48,7 @@ $(document).ready(async () => {
   // Delegación de eventos en tabla
   $('#table-dt-reclasif tbody').on('click', '.btn-edit-r', function() {
     const idUnico = String($(this).data('id'));
-    const reg = currentData.historial.find(x => String(x.idUnico) === idUnico);
+    const reg = (currentData.historial || []).find(x => String(x.idUnico) === idUnico);
     if (reg) abrirModalReclasif(reg);
   });
 });
@@ -56,12 +58,25 @@ async function cargarDatos() {
     const res = await apiFetch('/api/data/sistema');
     currentData = res;
 
+    actualizarKPIs(res.historial || [], res.maestro || []);
     poblarCatalogos();
     renderizarTablaReclasif(res.historial || []);
-    $('#badge-total-r').text(`${(res.historial || []).length} registros`);
+    $('#badge-total-r').text(`${(res.historial || []).length} pólizas recientes`);
   } catch (err) {
     showToast('Error cargando datos: ' + err.message, true);
   }
+}
+
+function actualizarKPIs(historial, maestro) {
+  const total = historial.length;
+  const activos = historial.filter(x => String(x.estatus).toUpperCase() === 'ACTIVO').length;
+  const reclasificados = historial.filter(x => x.correccionIntermediario && x.correccionIntermediario.trim() !== '').length;
+  const sucursales = (currentData.sucursales || []).length;
+
+  $('#kpi-total-polizas').text(total.toLocaleString());
+  $('#kpi-polizas-activas').text(activos.toLocaleString());
+  $('#kpi-polizas-reclasif').text(reclasificados.toLocaleString());
+  $('#kpi-total-sucursales').text(sucursales);
 }
 
 function poblarCatalogos() {
@@ -98,39 +113,42 @@ function poblarCatalogos() {
 
 function detectarEnlaceConMaestro() {
   const val = $('#form-r-correccion').val().trim();
+  const boxMatch = $('#r-maestro-match-info');
   if (!val) {
-    $('#r-maestro-match-info').addClass('hidden');
+    boxMatch.addClass('hidden');
     $('#form-r-codigo-int').val('');
     return;
   }
 
-  // Extraer posible código si viene en formato "Nombre [COD-123]"
-  const matchCod = val.match(/\[([^\]]+)\]/);
-  const searchCod = matchCod ? matchCod[1].trim() : '';
-  const searchName = val.replace(/\[[^\]]+\]/, '').trim().toUpperCase();
+  // Extraer código si viene en formato "NOMBRE [COD]"
+  let codBuscado = '';
+  const matchParentesis = val.match(/\[(.*?)\]$/);
+  if (matchParentesis) {
+    codBuscado = matchParentesis[1].trim();
+  }
 
   const match = (currentData.maestro || []).find(m => {
-    if (searchCod && String(m.cod).toUpperCase() === searchCod.toUpperCase()) return true;
-    if (String(m.cod).toUpperCase() === val.toUpperCase()) return true;
-    return String(m.intermediario).toUpperCase() === searchName;
+    if (codBuscado && String(m.cod) === codBuscado) return true;
+    const n1 = String(m.intermediario || '').toUpperCase();
+    const n2 = val.toUpperCase();
+    return n1 === n2 || n1.includes(n2);
   });
 
   if (match) {
     $('#form-r-codigo-int').val(match.cod);
-    
-    // Auto-completar sucursal, ejecutivo y líder vigentes desde el maestro
-    if (match.sucursal) $('#form-r-sucursal').val(match.sucursal);
-    if (match.ejecutivo) $('#form-r-ejecutivo').val(match.ejecutivo);
-    if (match.lider) $('#form-r-lider').val(match.lider);
-
-    $('#match-cod').text(`Código Maestro: ${match.cod}`);
+    $('#match-cod').html(`CÓDIGO: <strong class="text-slate-900">${match.cod}</strong> | ${match.intermediario}`);
     $('#match-activo').text(match.activo === 'SI' ? 'ACTIVO' : 'INACTIVO')
-      .attr('class', match.activo === 'SI' ? 'px-1.5 py-0.5 bg-emerald-100 text-emerald-800 font-bold' : 'px-1.5 py-0.5 bg-red-100 text-red-800 font-bold');
-    $('#match-detalles').text(`Asignado en Maestro a: ${match.ejecutivo || 'Sin asignar'} (${match.sucursal || 'Sin sucursal'})`);
-    $('#r-maestro-match-info').removeClass('hidden');
+      .attr('class', match.activo === 'SI' ? 'px-2 py-0.5 text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800' : 'px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-200 text-slate-700');
+    $('#match-detalles').text(`Sucursal: ${match.sucursal || 'N/A'} | Ejecutivo: ${match.ejecutivo || 'N/A'} | Líder: ${match.lider || 'N/A'}`);
+    boxMatch.removeClass('hidden');
+
+    // Autoseleccionar desplegables si están vacíos
+    if (match.sucursal && !$('#form-r-sucursal').val()) $('#form-r-sucursal').val(match.sucursal);
+    if (match.ejecutivo && !$('#form-r-ejecutivo').val()) $('#form-r-ejecutivo').val(match.ejecutivo);
+    if (match.lider && !$('#form-r-lider').val()) $('#form-r-lider').val(match.lider);
   } else {
-    $('#r-maestro-match-info').addClass('hidden');
     $('#form-r-codigo-int').val('');
+    boxMatch.addClass('hidden');
   }
 }
 
@@ -139,7 +157,6 @@ function verificarVigenciaPreviaPoliza() {
   const box = $('#r-closure-box').addClass('hidden');
   if (!poliza || editingRow) return;
 
-  // Buscar si esta póliza tiene un registro vigente (sin fecha fin)
   const vigente = (currentData.historial || []).find(h => {
     const codPol = String(h.codigo || '').toUpperCase();
     return codPol === poliza && (!h.fechaFin || h.fechaFin === '' || h.fechaFin === '—');
@@ -147,9 +164,9 @@ function verificarVigenciaPreviaPoliza() {
 
   if (vigente) {
     box.html(`
-      <strong>Aviso de Vigencia:</strong> La póliza <strong>${poliza}</strong> ya tiene una reclasificación activa a nombre de 
-      <strong>${vigente.nombreIntermediario}</strong> (Ejecutivo: ${vigente.ejecutivo || 'N/A'}).
-      Al guardar, el sistema asignará como <strong>Fecha Fin</strong> del periodo anterior el día previo a la nueva fecha de inicio.
+      <strong>Aviso de Vigencia:</strong> La póliza <strong>${poliza}</strong> ya tiene una asignación activa a nombre de 
+      <strong>${vigente.correccionIntermediario || vigente.nombreOriginal}</strong> (Ejecutivo: ${vigente.ejecutivo || 'N/A'}).
+      Al guardar, el sistema archivará el registro previo y asignará como <strong>Fecha Fin</strong> el día anterior a la nueva fecha de inicio.
     `).removeClass('hidden');
   }
 }
@@ -170,45 +187,56 @@ function renderizarTablaReclasif(datos) {
     columns: [
       {
         data: 'codigo',
-        render: d => `<span class="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5">${d || '—'}</span>`
+        render: d => `<span class="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 border border-slate-200">${d || '—'}</span>`
       },
       {
-        data: 'nombreTomador',
+        data: 'nombreOriginal',
+        render: d => `<span class="text-xs text-slate-700 font-medium">${d || '—'}</span>`
+      },
+      {
+        data: null,
         render: (d, t, row) => `
-          <div>
-            <span class="font-medium text-slate-800">${row.nombreIntermediario || '—'}</span>
-            ${row.nombreTomador ? `<div class="text-[11px] text-slate-500">Tomador: ${row.nombreTomador}</div>` : ''}
+          <div class="text-xs">
+            <span class="text-slate-800 font-medium">${row.nombreTomador || '—'}</span>
+            ${row.nombreAsegurado && row.nombreAsegurado !== row.nombreTomador ? `<div class="text-[11px] text-slate-500">Asegurado: ${row.nombreAsegurado}</div>` : ''}
           </div>
         `
       },
       {
-        data: 'nombreAsegurado',
-        render: d => d ? `<span class="text-xs text-slate-700">${d}</span>` : '<span class="text-slate-400 italic">—</span>'
+        data: null,
+        render: (d, t, row) => {
+          if (row.correccionIntermediario && row.correccionIntermediario.trim() !== '') {
+            return `
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-slate-900">${row.correccionIntermediario}</span>
+                <span class="text-[9px] px-1.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-mono font-semibold">RECLASIFICADO</span>
+              </div>
+            `;
+          }
+          return `<span class="text-slate-400 italic text-[11px]">(Sin Reclasificar)</span>`;
+        }
       },
       {
-        data: 'nombreIntermediario',
-        render: (d, t, row) => `
-          <div class="flex items-center gap-1.5">
-            <span class="font-semibold text-slate-900">${d || '—'}</span>
-            <span class="text-[9px] px-1 py-0.2 bg-emerald-50 text-emerald-800 border border-emerald-300 font-mono">CORREGIDO</span>
-          </div>
-        `
+        data: 'sucursal',
+        render: d => d ? `<span class="font-medium text-slate-800">${d}</span>` : '<span class="text-slate-400">—</span>'
       },
-      { data: 'sucursal', render: d => d || '—' },
-      { data: 'ejecutivo', render: d => `<span class="font-medium text-slate-800">${d || '—'}</span>` },
+      {
+        data: 'ejecutivo',
+        render: d => d ? `<span class="font-medium text-slate-800">${d}</span>` : '<span class="text-slate-400">—</span>'
+      },
       {
         data: null,
         render: (d, t, row) => `
           <div class="text-xs">
             <span class="text-slate-800">${row.lider || '—'}</span>
-            ${row.canal ? `<span class="text-[10px] text-slate-500 block">Canal: ${row.canal}</span>` : ''}
+            ${row.canal ? `<span class="text-[10px] text-slate-500 block font-mono">Canal: ${row.canal}</span>` : ''}
           </div>
         `
       },
       {
         data: null,
         render: (d, t, row) => `
-          <span class="font-mono text-[11px] text-slate-600">
+          <span class="font-mono text-[11px] text-slate-600 block">
             ${formatearFechaUI(row.fechaInicio)} → ${formatearFechaUI(row.fechaFin)}
           </span>
         `
@@ -216,8 +244,8 @@ function renderizarTablaReclasif(datos) {
       {
         data: 'estatus',
         render: d => {
-          const act = String(d).toUpperCase() === 'ACTIVO';
-          return `<span class="px-2 py-0.5 text-[10px] font-bold uppercase ${act ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 border border-slate-300'}">${act ? 'ACTIVO' : 'INACTIVO'}</span>`;
+          const act = String(d || 'ACTIVO').toUpperCase() === 'ACTIVO';
+          return `<span class="badge-tech ${act ? 'badge-active' : 'badge-inactive'}">${act ? 'ACTIVO' : 'INACTIVO'}</span>`;
         }
       },
       {
@@ -225,7 +253,7 @@ function renderizarTablaReclasif(datos) {
         className: 'text-right',
         orderable: false,
         render: (d, t, row) => `
-          <button type="button" class="btn-edit-r btn-outline px-2 py-1 text-[11px] font-semibold" data-id="${row.idUnico}">
+          <button type="button" class="btn-edit-r btn-outline px-2.5 py-1 text-[11px] font-semibold" data-id="${row.idUnico}">
             Editar
           </button>
         `
@@ -237,7 +265,7 @@ function renderizarTablaReclasif(datos) {
       info: "Mostrando _START_ a _END_ de _TOTAL_",
       infoEmpty: "0 registros",
       infoFiltered: "(filtrado de _MAX_)",
-      zeroRecords: "No se encontraron reclasificaciones",
+      zeroRecords: "No se encontraron pólizas reclasificadas",
       paginate: { first: "«", previous: "‹", next: "›", last: "»" }
     }
   });
@@ -257,6 +285,16 @@ function aplicarFiltros() {
   dtReclasif.draw();
 }
 
+function limpiarFiltros() {
+  $('#filter-r-sucursal').val('');
+  $('#filter-r-ejecutivo').val('');
+  $('#filter-r-canal').val('');
+  $('#filter-r-estatus').val('');
+  if (dtReclasif) {
+    dtReclasif.search('').columns().search('').draw();
+  }
+}
+
 function abrirModalReclasif(reg = null) {
   editingRow = reg;
   $('#form-r-error').addClass('hidden');
@@ -266,28 +304,34 @@ function abrirModalReclasif(reg = null) {
   const hoy = new Date().toISOString().slice(0, 10);
 
   if (reg) {
-    $('#modal-r-title').text('Editar Reclasificación');
+    $('#modal-r-title').text('Editar Reclasificación de Póliza');
     $('#form-r-modo').val('EDIT_ROW');
-    $('#form-r-edit-id').val(reg.idUnico || '');
-    $('#form-r-nropoliza').val(reg.codigo || '').prop('readonly', true);
-    $('#form-r-nombreoriginal').val(reg.nombreIntermediario || '');
+    $('#form-r-edit-id').val(reg.idUnico);
+
+    $('#form-r-nropoliza').val(reg.codigo || reg.nroPoliza || '').prop('readonly', true).addClass('bg-slate-100');
+    $('#form-r-nombreoriginal').val(reg.nombreOriginal || '').prop('readonly', false);
     $('#form-r-tomador').val(reg.nombreTomador || '');
     $('#form-r-asegurado').val(reg.nombreAsegurado || '');
-    $('#form-r-correccion').val(reg.nombreIntermediario || '');
+
+    const nombreCorr = reg.correccionIntermediario || reg.nombreIntermediario || '';
+    $('#form-r-correccion').val(nombreCorr);
+    detectarEnlaceConMaestro();
+
     $('#form-r-sucursal').val(reg.sucursal || '');
     $('#form-r-ejecutivo').val(reg.ejecutivo || '');
     $('#form-r-lider').val(reg.lider || '');
     $('#form-r-canal').val(reg.canal || '');
-    $('#form-r-fechainicio').val(reg.fechaInicio || hoy);
-    $('#form-r-fechafin').val(reg.fechaFin || '');
-    $('#form-r-estatus').val(reg.estatus || 'ACTIVO');
-    detectarEnlaceConMaestro();
+
+    $('#form-r-fechainicio').val(formatearFechaInput(reg.fechaInicio) || hoy);
+    $('#form-r-fechafin').val(formatearFechaInput(reg.fechaFin) || '');
+    $('#form-r-estatus').val((reg.estatus || 'ACTIVO').toUpperCase());
   } else {
     $('#modal-r-title').text('Nueva Reclasificación de Póliza');
-    $('#reclasif-form')[0].reset();
     $('#form-r-modo').val('NEW_OR_RECLASSIFY');
     $('#form-r-edit-id').val('');
-    $('#form-r-nropoliza').prop('readonly', false);
+
+    $('#reclasif-form')[0].reset();
+    $('#form-r-nropoliza').prop('readonly', false).removeClass('bg-slate-100');
     $('#form-r-fechainicio').val(hoy);
     $('#form-r-estatus').val('ACTIVO');
   }
@@ -303,30 +347,60 @@ function cerrarModalReclasif() {
 async function guardarReclasificacion(e) {
   e.preventDefault();
   const errBox = $('#form-r-error').addClass('hidden');
+  const btnSubmit = $('#modal-r-btn-submit').prop('disabled', true).text('Guardando...');
 
-  // Limpiar valor de corrección para quitar posible "[COD-123]"
-  const rawCorreccion = $('#form-r-correccion').val().trim();
-  const cleanCorreccion = rawCorreccion.replace(/\[[^\]]+\]/, '').trim();
+  const nroPoliza = $('#form-r-nropoliza').val().trim().toUpperCase();
+  const nombreOriginal = $('#form-r-nombreoriginal').val().trim();
+  let correccion = $('#form-r-correccion').val().trim();
+  const fechaInicio = $('#form-r-fechainicio').val();
+  const fechaFin = $('#form-r-fechafin').val();
+  const sucursal = $('#form-r-sucursal').val();
+  const ejecutivo = $('#form-r-ejecutivo').val();
+  const lider = $('#form-r-lider').val();
+  const canal = $('#form-r-canal').val();
+  const estatus = $('#form-r-estatus').val();
+
+  // Limpiar corchetes del nombre si venían del autocompletado
+  correccion = correccion.replace(/\s*\[.*?\]$/, '').trim();
+
+  if (!nroPoliza) {
+    errBox.text('Debe especificar el Número de Póliza.').removeClass('hidden');
+    btnSubmit.prop('disabled', false).text('Guardar Reclasificación');
+    return;
+  }
+  if (!correccion) {
+    errBox.text('Debe indicar la Corrección de Intermediario.').removeClass('hidden');
+    btnSubmit.prop('disabled', false).text('Guardar Reclasificación');
+    return;
+  }
+  if (!fechaInicio) {
+    errBox.text('Debe ingresar la Fecha de Inicio.').removeClass('hidden');
+    btnSubmit.prop('disabled', false).text('Guardar Reclasificación');
+    return;
+  }
+  if (fechaFin && fechaFin < fechaInicio) {
+    errBox.text('La Fecha Fin no puede ser menor a la Fecha de Inicio.').removeClass('hidden');
+    btnSubmit.prop('disabled', false).text('Guardar Reclasificación');
+    return;
+  }
 
   const payload = {
+    idUnico: $('#form-r-edit-id').val() || null,
     modo: $('#form-r-modo').val(),
-    editId: $('#form-r-edit-id').val(),
-    nroPoliza: $('#form-r-nropoliza').val().trim().toUpperCase(),
-    nombreIntermediarioOriginal: $('#form-r-nombreoriginal').val().trim(),
+    nroPoliza: nroPoliza,
+    nombreOriginal: nombreOriginal,
     nombreTomador: $('#form-r-tomador').val().trim(),
     nombreAsegurado: $('#form-r-asegurado').val().trim(),
-    correccionIntermediario: cleanCorreccion || rawCorreccion,
-    codigoIntermediario: $('#form-r-codigo-int').val() || '',
-    sucursalReclasif: $('#form-r-sucursal').val().trim(),
-    ejecutivoReclasif: $('#form-r-ejecutivo').val().trim(),
-    liderReclasif: $('#form-r-lider').val().trim(),
-    canalReclasif: $('#form-r-canal').val().trim(),
-    fechaInicio: $('#form-r-fechainicio').val(),
-    fechaFin: $('#form-r-fechafin').val(),
-    estatus: $('#form-r-estatus').val()
+    correccionIntermediario: correccion,
+    codigoIntermediario: $('#form-r-codigo-int').val() || null,
+    sucursal: sucursal,
+    ejecutivo: ejecutivo,
+    lider: lider,
+    canal: canal,
+    fechaInicio: fechaInicio,
+    fechaFin: fechaFin || null,
+    estatus: estatus
   };
-
-  const btnSubmit = $('#modal-r-btn-submit').prop('disabled', true).text('Guardando...');
 
   try {
     const res = await apiFetch('/api/reclasificaciones/guardar', {
@@ -334,13 +408,44 @@ async function guardarReclasificacion(e) {
       body: JSON.stringify(payload)
     });
 
-    showToast(res.mensaje || 'Reclasificación registrada.');
-    cerrarModalReclasif();
-    await cargarDatos();
+    if (res.exito) {
+      showToast(res.mensaje || 'Reclasificación procesada correctamente.');
+      cerrarModalReclasif();
+      await cargarDatos();
+    } else {
+      errBox.text(res.mensaje || 'Error al guardar.').removeClass('hidden');
+    }
   } catch (err) {
-    errBox.text(err.message).removeClass('hidden');
+    errBox.text(err.message || 'Error de comunicación con el servidor.').removeClass('hidden');
   } finally {
     btnSubmit.prop('disabled', false).text('Guardar Reclasificación');
   }
 }
 
+function formatearFechaUI(val) {
+  if (!val || val === '—') return '—';
+  const str = String(val).trim();
+  if (str.length >= 10 && str.includes('-')) {
+    const p = str.slice(0, 10).split('-');
+    if (p.length === 3 && p[0].length === 4) return `${p[2]}/${p[1]}/${p[0]}`;
+  }
+  return str;
+}
+
+function formatearFechaInput(val) {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (str.length >= 10 && str.includes('-') && str.indexOf('-') === 4) {
+    return str.slice(0, 10);
+  }
+  if (str.includes('/')) {
+    const p = str.split('/');
+    if (p.length === 3) {
+      const d = p[0].padStart(2, '0');
+      const m = p[1].padStart(2, '0');
+      const y = p[2].length === 2 ? '20' + p[2] : p[2];
+      return `${y}-${m}-${d}`;
+    }
+  }
+  return '';
+}
